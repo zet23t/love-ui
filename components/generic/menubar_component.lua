@@ -6,6 +6,9 @@ local desuffixed_pairs = require "love-util.desuffix_pairs"
 
 local menubar_component = require "love-util.class" "menubar_component":extends(require "love-ui.components.generic.ui_rect_component")
 
+---@param menubar table for example {File_1 = {Open_1=function()print"open"end}}
+---@param yoffset number|nil
+---@return unknown
 function menubar_component:new(menubar, yoffset)
 	local self = menubar_component:create { menubar = menubar }
 	self.yoffset = yoffset or 9
