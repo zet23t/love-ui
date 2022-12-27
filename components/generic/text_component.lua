@@ -25,4 +25,8 @@ function text_component:draw(ui_rect)
 	pico8api:print(self.text, x, y, self.color)
 end
 
+function text_component:set_text(text)
+	self.text = text or ""
+end
+
 return text_component
