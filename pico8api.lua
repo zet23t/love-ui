@@ -9,10 +9,11 @@ local function with_color(fn, r, g, b, a)
 	love.graphics.setColor(r0, g0, b0, a0)
 end
 
-function pico8api:rectfill(x, y, x2, y2, color)
+function pico8api:rectfill(x, y, x2, y2, color, alpha_override)
+	local r, g, b, a = unpack(self.colors[color])
 	with_color(function()
 		love.graphics.rectangle("fill", x, y, x2 - x, y2 - y)
-	end, unpack(self.colors[color]))
+	end, r, g, b, alpha_override or a)
 end
 
 function pico8api:screen_size()
@@ -63,10 +64,11 @@ function pico8api:text_width(s)
 	return w - 1
 end
 
-function pico8api:rect(x, y, x2, y2, color)
+function pico8api:rect(x, y, x2, y2, color, alpha_override)
+	local r, g, b, a = unpack(self.colors[color])
 	with_color(function()
 		love.graphics.rectangle("line", x, y, x2 - x, y2 - y)
-	end, unpack(self.colors[color]))
+	end, r, g, b, alpha_override or a)
 end
 
 function pico8api:spr(id, x, y, w, h)
@@ -79,10 +81,10 @@ end
 
 function pico8api:clip(x, y, w, h)
 	if x then
-		x,y = love.graphics.transformPoint(x,y)
-		local ox,oy = love.graphics.transformPoint(0,0)
-		w,h = love.graphics.transformPoint(w,h)
-		w,h = w - ox, h - oy
+		x, y = love.graphics.transformPoint(x, y)
+		local ox, oy = love.graphics.transformPoint(0, 0)
+		w, h = love.graphics.transformPoint(w, h)
+		w, h = w - ox, h - oy
 		love.graphics.setScissor(x, y, w, h)
 	else
 		love.graphics.setScissor()

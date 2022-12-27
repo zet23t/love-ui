@@ -17,8 +17,13 @@ end
 function rectfill_component:draw(ui_rect)
 	local x, y = ui_rect:to_world()
 	local x2, y2 = x + ui_rect.w - 1, y + ui_rect.h - 1
-	if self.fill >= 0 then pico8api:rectfill(x, y, x2 + 1, y2 + 1, self.fill) end
-	if self.border >= 0 then pico8api:rect(x + .5, y + .5, x2 + .5, y2 + .5, self.border) end
+	if self.fill >= 0 then pico8api:rectfill(x, y, x2 + 1, y2 + 1, self.fill, self.alpha) end
+	if self.border >= 0 then pico8api:rect(x + .5, y + .5, x2 + .5, y2 + .5, self.border, self.alpha) end
+end
+
+function rectfill_component:set_alpha(alpha)
+	self.alpha = alpha
+	return self
 end
 
 return rectfill_component
