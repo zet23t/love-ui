@@ -1,7 +1,6 @@
 local pico8api = require "love-ui.pico8api"
 
 ---@class sprite_component:ui_rect_component
-
 local sprite_component = require "love-util.class" "sprite_component":extends(require "love-ui.components.generic.ui_rect_component")
 
 ---@param sprite_id integer

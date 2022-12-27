@@ -1,9 +1,8 @@
----@class parent_size_matcher_component
+---@class parent_size_matcher_component : ui_rect_component
 ---@field t number|true
 ---@field r number|true
 ---@field b number|true
 ---@field l number|true
-
 local parent_size_matcher_component = require "love-util.class" "parent_size_matcher_component":extends(require "love-ui.components.generic.ui_rect_component")
 
 ---Top, right, bottom, left distances relative to parent component size. If values passed are "true"

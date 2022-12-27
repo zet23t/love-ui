@@ -45,13 +45,12 @@ local function trigger_queued(cmps, name, ...)
 	end
 end
 
----@class ui_rect
+---@class ui_rect : object
 ---@field disabled boolean
 ---@field id string
 ---@field children ui_rect[]
 ---@field components ui_rect_component
 ---@field flags table
-
 local ui_rect = require "love-util.class" "ui_rect"
 
 function ui_rect:collect_hits(x, y, list)
@@ -184,6 +183,10 @@ function ui_rect:add_component_proxy(cmp, ...)
 	if cmp then
 		return self:add_component(proxy_instance(cmp)), self:add_component_proxy(...)
 	end
+end
+
+function ui_rect:get_size()
+	return self.w, self.h
 end
 
 ---Add a variable number of components to the ui_rect
