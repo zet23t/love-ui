@@ -72,7 +72,7 @@ function pico8api:rect(x, y, x2, y2, color, alpha_override)
 end
 
 function pico8api:spr(id, x, y, w, h)
-	love.graphics.draw(self.sprite_sheet, self.quads[id], x, y)
+	love.graphics.draw(self.sprite_sheet, self.quads[id], math.floor(x), math.floor(y))
 end
 
 function pico8api:deli(t, i)
