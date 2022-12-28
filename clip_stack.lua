@@ -22,4 +22,16 @@ function clip_stack:pop()
 	pico8api:clip(unpack(clip_stack[#clip_stack]))
 end
 
+---Returns the current clipping region - if no clip is defined, it returns the screen rect
+---@return number x
+---@return number y
+---@return number width
+---@return number height
+function clip_stack:current_rect()
+	if #clip_stack > 0 then
+		return unpack(clip_stack[#clip_stack])
+	end
+	return 0,0,pico8api:screen_size()
+end
+
 return clip_stack
