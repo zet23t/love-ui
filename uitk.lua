@@ -7,7 +7,7 @@ local cursor_resize = { id = 17, offset_x = -4, offset_y = -4 }
 local cursor = cursor_normal
 
 local uitk = {}
-uitk._mt = {__index = uitk}
+uitk._mt = { __index = uitk }
 
 function uitk:new()
 	local self = setmetatable({}, self._mt)
@@ -16,7 +16,7 @@ function uitk:new()
 		was_mouse_released = false,
 		queued_updates = {},
 	}
-	self.context_mt = {__index = self.context, __newindex = self.context}
+	self.context_mt = { __index = self.context, __newindex = self.context }
 	return self
 end
 
@@ -58,8 +58,7 @@ function uitk:update(root)
 	uitk_vars.was_mouse_released = not mouse_down and prev_mouse_down
 	-- print("??",mouse_down,uitk_vars.was_mouse_pressed)
 	local hits = {}
-	root:recursive_trigger("layout_update_size")
-		:recursive_trigger("layout_update")
+	root:do_layout()
 		:collect_hits(x, y, hits)
 	root:update_flags(x, y, hits)
 
