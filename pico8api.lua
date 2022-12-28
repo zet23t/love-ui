@@ -85,7 +85,7 @@ function pico8api:clip(x, y, w, h)
 		local ox, oy = love.graphics.transformPoint(0, 0)
 		w, h = love.graphics.transformPoint(w, h)
 		w, h = w - ox, h - oy
-		love.graphics.setScissor(x, y, w, h)
+		love.graphics.setScissor(x, y, math.max(0, w), math.max(0, h))
 	else
 		love.graphics.setScissor()
 	end
