@@ -1,7 +1,7 @@
----@class sprite9_component
----@field batch love.SpriteBatch
-
 local pico8api = require "love-ui.pico8api"
+
+---@class sprite9_component : ui_rect_component
+---@field batch love.SpriteBatch
 local sprite9_component = require "love-util.class" "sprite9_component":extends(require "love-ui.components.generic.ui_rect_component")
 function sprite9_component:new(sx, sy, sw, sh, t, r, b, l)
 	local c = sprite9_component:create {

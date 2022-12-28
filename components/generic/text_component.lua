@@ -1,7 +1,14 @@
 local pico8api = require "love-ui.pico8api"
 
----@class text_component
-
+---@class text_component : ui_rect_component
+---@field text string
+---@field color integer
+---@field align_x number
+---@field align_y number
+---@field t number
+---@field r number
+---@field b number
+---@field l number
 local text_component = require "love-util.class" "text_component":extends(require "love-ui.components.generic.ui_rect_component")
 
 function text_component:new(text, color, t, r, b, l, align_x, align_y)
