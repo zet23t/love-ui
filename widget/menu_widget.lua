@@ -6,13 +6,13 @@ local desuffixed_pairs = require "love-util.desuffix_pairs"
 local max = math.max
 local abs = math.abs
 
-local menu_component = require "love-util.class" "menu_component":extends(require "love-ui.components.generic.ui_rect_component")
+local menu_widget = require "love-util.class" "menu_widget":extends(require "love-ui.components.generic.ui_rect_component")
 
-function menu_component:new(menu, owner)
-	return menu_component:create { menu = menu, owner = owner, show_count = 1, timeout = 5 }
+function menu_widget:new(menu, owner)
+	return menu_widget:create { menu = menu, owner = owner, show_count = 1, timeout = 5 }
 end
 
-function menu_component:init(ui_rect)
+function menu_widget:init(ui_rect)
 	local menu_c = self
 	ui_rect:add_component(rectfill_component:new(6, 5))
 	local y = 2
@@ -61,7 +61,7 @@ function menu_component:init(ui_rect)
 
 				function event_handler:is_mouse_over(ui_rect)
 					local x, y = ui_rect:to_world(ui_rect.w - 2)
-					submenu_c = ui_rect:new(x, y, 10, 10, ui_rect:root()):add_component(menu_component:new(v, menu_c))
+					submenu_c = ui_rect:new(x, y, 10, 10, ui_rect:root()):add_component(menu_widget:new(v, menu_c))
 				end
 			end
 			if icon then
@@ -80,21 +80,21 @@ function menu_component:init(ui_rect)
 	end
 end
 
-function menu_component:show(change)
+function menu_widget:show(change)
 	self.show_count = self.show_count + change
 	return self.show_count > 0 and self
 end
 
-function menu_component:update(ui_rect)
+function menu_widget:update(ui_rect)
 	self.timeout = self.timeout - 1
 	if self.timeout < 0 then
 		ui_rect:remove()
 	end
 end
 
-function menu_component:is_mouse_over(ui_rect)
+function menu_widget:is_mouse_over(ui_rect)
 	if self.owner then self.owner.timeout = 5 end
 	self.timeout = 5
 end
 
-return menu_component
+return menu_widget

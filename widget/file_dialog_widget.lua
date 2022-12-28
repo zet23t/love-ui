@@ -8,7 +8,7 @@ local text_component                = require "love-ui.components.generic.text_c
 local clip_component                = require "love-ui.components.generic.clip_component"
 local pico8api                      = require "love-ui.pico8api"
 local clip_stack                    = require "love-ui.clip_stack"
-local scrollbar_component           = require "love-ui.components.generic.scrollbar_component"
+local scrollbar_widget              = require "love-ui.widget.scrollbar_widget"
 
 ---@class file_dialog_widget : object
 ---@field screen_rect ui_rect the full screen rect
@@ -61,7 +61,7 @@ function file_dialog_widget:new(ui_theme)
 	self.directory_hierarchy_scroll = ui_rect:new(0, 0, 8, 100, self.directory_hierarchy,
 		weighted_position_component:new(1, 0),
 		parent_size_matcher_component:new(0, true, 0, true),
-		scrollbar_component:new_themed(2, ui_theme))
+		scrollbar_widget:new_themed(2, ui_theme))
 
 	self.directory_hierarchy_clip_area = ui_rect:new(0, 0, 0, 0, self.directory_hierarchy,
 		parent_size_matcher_component:new(1, 8, 1, 1),

@@ -5,7 +5,7 @@ local late_command = require "love-util.late_command"
 local gstore_accessor = require "love-util.gstore_accessor"
 local sprite_component= require "love-ui.components.generic.sprite_component"
 
----@class scrollbar_component:ui_rect_component
+---@class scrollbar_widget:ui_rect_component
 ---@field axis 1|2
 ---@field shaft_skin_component ui_rect_component
 ---@field slider_skin_component ui_rect_component
@@ -16,7 +16,7 @@ local sprite_component= require "love-ui.components.generic.sprite_component"
 ---@field scope number
 ---@field pos number
 ---@field value_change_listeners func_list
-local scrollbar_component = require "love-util.class" "scrollbar_component":extends(require "love-ui.components.generic.ui_rect_component")
+local scrollbar_widget = require "love-util.class" "scrollbar_widget":extends(require "love-ui.components.generic.ui_rect_component")
 
 ---@param axis 1|2 
 ---@param shaft_skin_component ui_rect_component
@@ -24,9 +24,9 @@ local scrollbar_component = require "love-util.class" "scrollbar_component":exte
 ---@param button_skin_component ui_rect_component
 ---@param icon_less_component ui_rect_component
 ---@param icon_more_component ui_rect_component
----@return scrollbar_component
-function scrollbar_component:new(axis, shaft_skin_component, slider_skin_component, button_skin_component, icon_less_component, icon_more_component)
-	return scrollbar_component:create {
+---@return scrollbar_widget
+function scrollbar_widget:new(axis, shaft_skin_component, slider_skin_component, button_skin_component, icon_less_component, icon_more_component)
+	return scrollbar_widget:create {
 		axis = axis or 1,
 		shaft_skin_component = shaft_skin_component or {},
 		slider_skin_component = slider_skin_component or {},
@@ -42,26 +42,26 @@ end
 
 ---@param axis 1|2
 ---@param ui_theme ui_theme
-function scrollbar_component:new_themed(axis, ui_theme)
+function scrollbar_widget:new_themed(axis, ui_theme)
 	return self:new(axis, ui_theme:scrollbar_shaft_skin(), ui_theme:scrollbar_slider_skin(), ui_theme:button_skin(), 
 		sprite_component:new(axis == 1 and ui_theme.icon.tiny_triangle_left or ui_theme.icon.tiny_triangle_down),
 		sprite_component:new(axis == 1 and ui_theme.icon.tiny_triangle_right or ui_theme.icon.tiny_triangle_up)
 	)
 end
 
-gstore_accessor(scrollbar_component, "pos")
+gstore_accessor(scrollbar_widget, "pos")
 
-function scrollbar_component:add_listener(f)
+function scrollbar_widget:add_listener(f)
 	self.value_change_listeners:add(f)
 	return self
 end
 
-function scrollbar_component:remove_listener(f)
+function scrollbar_widget:remove_listener(f)
 	self.value_change_listeners:remove(f)
 	return self
 end
 
-function scrollbar_component:init(ui_rect)
+function scrollbar_widget:init(ui_rect)
 	ui_rect:add_component_proxy(self.shaft_skin_component)
 
 	self.less_rect = ui_rect:new_with_proxy_components(0, 0, 0, 0, ui_rect,
@@ -99,7 +99,7 @@ function scrollbar_component:init(ui_rect)
 	})
 end
 
-function scrollbar_component:layout_update(ui_rect)
+function scrollbar_widget:layout_update(ui_rect)
 	local w, h = ui_rect.w, ui_rect.h
 	local horizontal = self.axis == 1
 	local available_size = horizontal and (w - h * 2) or (h - 2 * w)
@@ -118,4 +118,4 @@ function scrollbar_component:layout_update(ui_rect)
 	end
 end
 
-return scrollbar_component
+return scrollbar_widget
