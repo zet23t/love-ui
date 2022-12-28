@@ -151,7 +151,7 @@ function ui_rect:update(mx, my)
 	local was_mouse_over = flags.was_mouse_over
 
 	if mouse_over ~= was_mouse_over then
-		trigger_queued(self.components, mouse_over and "mouse_enter" or "mouse_exit", mx, my)
+		trigger_queued(self.components, mouse_over and "mouse_enter" or "mouse_exit", self, mx, my)
 	end
 
 	flag_trigger(self, "is_mouse_over", mx, my)(
