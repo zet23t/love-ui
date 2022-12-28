@@ -1,7 +1,6 @@
 local rect_contains = require "love-math.rect_contains"
 local clamp = require "love-math.clamp"
 local proxy_instance = require "love-util.proxy_instance"
-local late_command = require "love-util.late_command"
 local uitk_vars = require "love-ui.uitk_vars"
 local pico8api = require "love-ui.pico8api"
 local clip_stack = require "love-ui.clip_stack"
@@ -12,7 +11,6 @@ local function trigger(cmps, name, ...)
 		local c = cmps[i]
 		local f = c[name]
 		if f then
-			-- require "log" ("? %s:%s", c, name)
 			f(c, ...)
 		end
 	end
@@ -21,8 +19,6 @@ end
 
 local function queue_call(name, f, ...)
 	local list = uitk_vars.queued_updates[name] or {}
-	-- require "log" ("?qc %s %d",name, list and #list or -1)
-
 	pico8api:add(list, { f = f, ... })
 	uitk_vars.queued_updates[name] = list
 end
@@ -118,6 +114,10 @@ function ui_rect:recursive_trigger(name, ...)
 	return self
 end
 
+function ui_rect:trigger_on_components(name, ...)
+	trigger(self.components, name, ...)
+end
+
 function ui_rect:root()
 	return self.parent and self.parent:root() or self
 end
@@ -135,12 +135,23 @@ end
 ui_rect.to_front = ui_rect.to_pos
 
 function ui_rect:remove()
-	late_command(function()
-		if self.parent then
-			pico8api:del(self.parent.children, self)
-			self.parent = nil
+	pico8api:del(self.parent.children, self)
+	self.parent = nil
+end
+
+function ui_rect:remove_all_children()
+	for i = 1, #self.children do
+		local child = self.children[i]
+		if child.parent == self then
+			child.parent = nil
 		end
-	end)
+	end
+	self.children = {}
+end
+
+function ui_rect:do_layout()
+	return self:recursive_trigger("layout_update_size")
+		:recursive_trigger("layout_update")
 end
 
 function ui_rect:update(mx, my)
@@ -231,6 +242,7 @@ function ui_rect:foreach_component_method(method)
 			search_subscribers(ui_rect.children[i])
 		end
 	end
+
 	return coroutine.wrap(search_subscribers)
 end
 
