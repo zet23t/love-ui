@@ -36,10 +36,22 @@ ui_theme.icon = {
 	play = 37;
 	pause = 38;
 	to_end = 39;
+	hierarchy = 41;
+	closed_folder = 42;
 }
 
 function ui_theme:new()
 	return ui_theme:create()
+end
+
+function ui_theme:scrollbar_shaft_skin()
+	local s9 = sprite9_component:new(72,0,8,8,2,2,2,2)
+	return s9
+end
+
+function ui_theme:scrollbar_slider_skin()
+	local s9 = sprite9_component:new(16,0,8,8,2,2,2,2)
+	return s9
 end
 
 function ui_theme:button_skin()

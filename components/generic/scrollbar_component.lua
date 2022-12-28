@@ -3,10 +3,19 @@ local clamp = require "love-math.clamp"
 local func_list = require "love-util.func_list"
 local late_command = require "love-util.late_command"
 local gstore_accessor = require "love-util.gstore_accessor"
+local sprite_component= require "love-ui.components.generic.sprite_component"
 
 ---@class scrollbar_component:ui_rect_component
+---@field axis 1|2
+---@field shaft_skin_component ui_rect_component
+---@field slider_skin_component ui_rect_component
+---@field button_skin_component ui_rect_component
+---@field icon_less_component ui_rect_component
+---@field icon_more_component ui_rect_component
+---@field range number
+---@field scope number
+---@field pos number
 ---@field value_change_listeners func_list
-
 local scrollbar_component = require "love-util.class" "scrollbar_component":extends(require "love-ui.components.generic.ui_rect_component")
 
 ---@param axis 1|2 
@@ -29,6 +38,15 @@ function scrollbar_component:new(axis, shaft_skin_component, slider_skin_compone
 		pos = 0,
 		value_change_listeners = func_list:new()
 	}
+end
+
+---@param axis 1|2
+---@param ui_theme ui_theme
+function scrollbar_component:new_themed(axis, ui_theme)
+	return self:new(axis, ui_theme:scrollbar_shaft_skin(), ui_theme:scrollbar_slider_skin(), ui_theme:button_skin(), 
+		sprite_component:new(axis == 1 and ui_theme.icon.tiny_triangle_left or ui_theme.icon.tiny_triangle_down),
+		sprite_component:new(axis == 1 and ui_theme.icon.tiny_triangle_right or ui_theme.icon.tiny_triangle_up)
+	)
 end
 
 gstore_accessor(scrollbar_component, "pos")
