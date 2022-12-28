@@ -26,4 +26,7 @@ function rectfill_component:set_alpha(alpha)
 	return self
 end
 
+function rectfill_component:set_fill(fill) self.fill = fill end
+function rectfill_component:set_border(border) self.border = border end
+
 return rectfill_component
