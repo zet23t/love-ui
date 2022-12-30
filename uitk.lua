@@ -75,6 +75,13 @@ function uitk:update(root)
 	"update"
 
 	prev_mouse_down = mouse_down
+	uitk_vars.mouse_wheel_dx = 0
+	uitk_vars.mouse_wheel_dy = 0
+end
+
+function uitk:mouse_wheelmoved(dx, dy)
+	uitk_vars.mouse_wheel_dx = dx
+	uitk_vars.mouse_wheel_dy = dy
 end
 
 function uitk:enable_mouse()

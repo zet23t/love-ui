@@ -1,7 +1,6 @@
 local vars = {
-	-- was_mouse_pressed = false,
-	-- was_mouse_released = false,
-	-- queued_updates = {},
+	mouse_wheel_dx = 0;
+	mouse_wheel_dy = 0;
 }
 
 return vars
