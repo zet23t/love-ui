@@ -1,9 +1,10 @@
----@class ui_theme : object
-local ui_theme = require "love-util.class" "ui_theme"
-
+local rectfill_component = require "love-ui.components.generic.rectfill_component"
 local sprite9_component = require "love-ui.components.generic.sprite9_component"
 local sprite_component = require "love-ui.components.generic.sprite_component"
 local text_component = require "love-ui.components.generic.text_component"
+
+---@class ui_theme : object
+local ui_theme = require "love-util.class" "ui_theme"
 
 ui_theme.icon = {
 	cursor = 1;
@@ -45,12 +46,16 @@ function ui_theme:new()
 end
 
 function ui_theme:scrollbar_shaft_skin()
-	local s9 = sprite9_component:new(72,0,8,8,2,2,2,2)
+	local s9 = sprite9_component:new(72, 0, 8, 8, 2, 2, 2, 2)
 	return s9
 end
 
+function ui_theme:scroll_area_view()
+	return rectfill_component:new(7,1)
+end
+
 function ui_theme:scrollbar_slider_skin()
-	local s9 = sprite9_component:new(16,0,8,8,2,2,2,2)
+	local s9 = sprite9_component:new(16, 0, 8, 8, 2, 2, 2, 2)
 	return s9
 end
 
@@ -86,13 +91,7 @@ function ui_theme:decorate_button_skin(ui_rect, caption, on_click)
 		ui_rect:add_component(text_component:new(caption, 1, 0, 0, 0, 0, .5, .5))
 	end
 	if on_click then
-		ui_rect:add_component({
-			was_released = function(self, rect)
-				if rect.flags.is_mouse_over then
-					on_click()
-				end
-			end
-		})
+		ui_rect:add_component{ was_triggered = on_click }
 	end
 end
 
