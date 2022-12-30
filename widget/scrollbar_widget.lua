@@ -3,7 +3,7 @@ local clamp = require "love-math.clamp"
 local func_list = require "love-util.func_list"
 local late_command = require "love-util.late_command"
 local gstore_accessor = require "love-util.gstore_accessor"
-local sprite_component= require "love-ui.components.generic.sprite_component"
+local sprite_component = require "love-ui.components.generic.sprite_component"
 
 ---@class scrollbar_widget:ui_rect_component
 ---@field axis 1|2
@@ -12,20 +12,21 @@ local sprite_component= require "love-ui.components.generic.sprite_component"
 ---@field button_skin_component ui_rect_component
 ---@field icon_less_component ui_rect_component
 ---@field icon_more_component ui_rect_component
----@field range number
----@field scope number
----@field pos number
+---@field range number total range
+---@field scope number amount of units that are visible
+---@field pos number number between 0 and range
 ---@field value_change_listeners func_list
 local scrollbar_widget = require "love-util.class" "scrollbar_widget":extends(require "love-ui.components.generic.ui_rect_component")
 
----@param axis 1|2 
+---@param axis 1|2
 ---@param shaft_skin_component ui_rect_component
 ---@param slider_skin_component ui_rect_component
 ---@param button_skin_component ui_rect_component
 ---@param icon_less_component ui_rect_component
 ---@param icon_more_component ui_rect_component
 ---@return scrollbar_widget
-function scrollbar_widget:new(axis, shaft_skin_component, slider_skin_component, button_skin_component, icon_less_component, icon_more_component)
+function scrollbar_widget:new(axis, shaft_skin_component, slider_skin_component, button_skin_component,
+                              icon_less_component, icon_more_component)
 	return scrollbar_widget:create {
 		axis = axis or 1,
 		shaft_skin_component = shaft_skin_component or {},
@@ -43,13 +44,19 @@ end
 ---@param axis 1|2
 ---@param ui_theme ui_theme
 function scrollbar_widget:new_themed(axis, ui_theme)
-	return self:new(axis, ui_theme:scrollbar_shaft_skin(), ui_theme:scrollbar_slider_skin(), ui_theme:button_skin(), 
-		sprite_component:new(axis == 1 and ui_theme.icon.tiny_triangle_left or ui_theme.icon.tiny_triangle_down),
-		sprite_component:new(axis == 1 and ui_theme.icon.tiny_triangle_right or ui_theme.icon.tiny_triangle_up)
+	return self:new(axis, ui_theme:scrollbar_shaft_skin(), ui_theme:scrollbar_slider_skin(), ui_theme:button_skin(),
+		sprite_component:new(axis == 1 and ui_theme.icon.tiny_triangle_left or ui_theme.icon.tiny_triangle_up, 2, 2),
+		sprite_component:new(axis == 1 and ui_theme.icon.tiny_triangle_right or ui_theme.icon.tiny_triangle_down, 2, 2)
 	)
 end
 
-gstore_accessor(scrollbar_widget, "pos")
+function scrollbar_widget:get_pos()
+	return self.pos
+end
+
+function scrollbar_widget:set_pos(pos)
+	self.pos = clamp(0, math.max(0, self.range - self.scope), pos)
+end
 
 function scrollbar_widget:add_listener(f)
 	self.value_change_listeners:add(f)
@@ -103,10 +110,10 @@ function scrollbar_widget:layout_update(ui_rect)
 	local w, h = ui_rect.w, ui_rect.h
 	local horizontal = self.axis == 1
 	local available_size = horizontal and (w - h * 2) or (h - 2 * w)
-	local slider_size = max(horizontal and h or w, self.scope / self.range * available_size)
+	local slider_size = max(horizontal and h or w, math.min(1, self.scope / self.range) * available_size)
 	local wiggle_room = available_size - slider_size
 	local position = self:get_pos(0) / (self.range - self.scope) * wiggle_room
-	
+
 	if self.axis == 1 then
 		self.less_rect:set_rect(0, 0, h, h)
 		self.more_rect:set_rect(w - h, 0, h, h)

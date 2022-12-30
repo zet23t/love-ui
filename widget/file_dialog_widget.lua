@@ -9,11 +9,15 @@ local clip_component                = require "love-ui.components.generic.clip_c
 local pico8api                      = require "love-ui.pico8api"
 local clip_stack                    = require "love-ui.clip_stack"
 local scrollbar_widget              = require "love-ui.widget.scrollbar_widget"
+local scroll_area_widget            = require "love-ui.widget.scroll_area_widget"
 
 ---@class file_dialog_widget : object
 ---@field screen_rect ui_rect the full screen rect
 ---@field directory_hierarchy_list ui_rect
 local file_dialog_widget = require "love-util.class" "file_dialog_widget"
+
+
+file_dialog_widget.indent_per_level = 4
 
 ---@param ui_theme ui_theme
 ---@return file_dialog_widget
@@ -51,35 +55,26 @@ function file_dialog_widget:new(ui_theme)
 		}
 	)
 
-	self.directory_hierarchy = ui_rect:new(3, 10, 100, 100, self.dialog_panel,
-		rectfill_component:new(7, 1),
-		{
-			layout_update = function(c, rect) rect.h = rect.parent.h - 23 end;
-		}
-	)
+	self.directory_hierarchy = ui_rect:new(3, 10, 100, 100, self.dialog_panel, {
+		layout_update = function(cmp, rect)
+			rect.h = rect.parent.h - rect.y - 14
+		end
+	})
+	self.directory_hierarchy_scroll_view = self.directory_hierarchy:add_component(scroll_area_widget:new(ui_theme))
 
-	self.directory_hierarchy_scroll = ui_rect:new(0, 0, 8, 100, self.directory_hierarchy,
-		weighted_position_component:new(1, 0),
-		parent_size_matcher_component:new(0, true, 0, true),
-		scrollbar_widget:new_themed(2, ui_theme))
-
-	self.directory_hierarchy_clip_area = ui_rect:new(0, 0, 0, 0, self.directory_hierarchy,
-		parent_size_matcher_component:new(1, 8, 1, 1),
-		clip_component:new()
-	)
 	local line_height = 9
-	self.directory_hierarchy_list = ui_rect:new(0, 0, 0, 0, self.directory_hierarchy_clip_area, {
+	self.directory_hierarchy_scroll_view.scroll_content:add_component {
 		layout_update_size = function(comp, ui_rect)
 			ui_rect.h = #self.directory_hierarchy_list * line_height
-			ui_rect.w = ui_rect.parent.w
+			ui_rect.w = self.max_width + 8
 		end;
 		draw = function(comp, ui_rect)
-			-- love.graphics.setScissor()
 			local x, y = ui_rect:to_world()
 			local cx1, cy1, cw, ch = clip_stack:current_rect()
 			local cy2 = cy1 + ch
-			local start = math.max(1, math.floor((y - cy1) / line_height))
-			for i = start, math.min(#self.directory_hierarchy_list, math.ceil(start + ch / line_height) - 1) do
+			local from = math.max(1, math.ceil((cy1 - y) / line_height))
+			local to = math.min(#self.directory_hierarchy_list, math.ceil((cy2 - y) / line_height))
+			for i = from, to do
 				local dir_info = self.directory_hierarchy_list[i]
 				local px = x + 4 * dir_info.level
 				local py = y + (i - 1) * line_height
@@ -87,7 +82,7 @@ function file_dialog_widget:new(ui_theme)
 				pico8api:print(dir_info.file_name, px + 10, py + 2, 1)
 			end
 		end
-	})
+	}
 
 
 	self:set_directory(love.filesystem.getWorkingDirectory())
@@ -99,6 +94,7 @@ function file_dialog_widget:set_directory(path)
 	local current_path = ""
 
 	self.directory_hierarchy_list = {}
+	self.max_width = 0
 	local function amend(current_path, level)
 		level = level + 1
 		local files = nativefs.getDirectoryItems(current_path)
@@ -114,6 +110,7 @@ function file_dialog_widget:set_directory(path)
 					file_name = files[i];
 					directory = current_path;
 				}
+				self.max_width = math.max(self.max_width, self.indent_per_level * level + pico8api:text_width(files[i]) + 10)
 				if is_opened then
 					amend(file_path .. "/", level + 1)
 				end
