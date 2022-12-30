@@ -58,6 +58,14 @@ function ui_rect:collect_hits(x, y, list)
 	y = y - self.y
 
 	local is_inside = rect_contains(0, 0, self.w, self.h, x, y)
+	if not is_inside then
+		for i = 1, #self.components do
+			local cmp = self.components[i]
+			if cmp.is_clipping_mouse then
+				return false
+			end
+		end
+	end
 	if is_inside then
 		pico8api:add(list, self, 1)
 		list[self] = true
