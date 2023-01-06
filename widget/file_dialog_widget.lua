@@ -10,10 +10,13 @@ local pico8api                      = require "love-ui.pico8api"
 local clip_stack                    = require "love-ui.clip_stack"
 local scrollbar_widget              = require "love-ui.widget.scrollbar_widget"
 local scroll_area_widget            = require "love-ui.widget.scroll_area_widget"
+local virtual_list_widget           = require "love-ui.widget.virtual_list_widget"
+local sprite_component              = require "love-ui.components.generic.sprite_component"
 
 ---@class file_dialog_widget : object
 ---@field screen_rect ui_rect the full screen rect
 ---@field directory_hierarchy_list ui_rect
+---@field opened_directories table
 local file_dialog_widget = require "love-util.class" "file_dialog_widget"
 
 
@@ -31,23 +34,25 @@ function file_dialog_widget:new(ui_theme)
 	self.screen_rect:add_component(parent_size_matcher_component:new(0, 0, 0, 0))
 	self.screen_rect:add_component(rectfill_component:new(1):set_alpha(.5))
 
+	self.opened_directories = {}
+
 	self.dialog_panel = ui_rect:new(0, 0, 300, 200, self.screen_rect, weighted_position_component:new(),
 		parent_limited_size_component:new(300, 200))
 	ui_theme:decorate_window_skin(self.dialog_panel, "Open file")
 
 	self.close_x_button = ui_rect:new(0, 0, 8, 8, self.dialog_panel, weighted_position_component:new(1, 0, 1, 2))
 	ui_theme:decorate_sprite(self.close_x_button, ui_theme.icon.close_x)
-	ui_theme:decorate_on_click(self.close_x_button, function() self:close() end)
+	ui_theme:decorate_on_click(self.close_x_button, function() self:close(true) end)
 
 	self.cancel_button = ui_rect:new(0, 0, 40, 9, self.dialog_panel, weighted_position_component:new(1, 1, 0, 3, 3))
-	ui_theme:decorate_button_skin(self.cancel_button, "Cancel", function() self:close() end)
+	ui_theme:decorate_button_skin(self.cancel_button, "Cancel", function() self:close(true) end)
 
 	self.open_button = ui_rect:new(0, 0, 40, 9, self.dialog_panel, weighted_position_component:new(1, 1, 0, 45, 3))
 	ui_theme:decorate_button_skin(self.open_button, "Open", function() self:close() end)
 
 	self.file_name = ui_rect:new(3, 0, 0, 9, self.dialog_panel,
 		rectfill_component:new(7, 1),
-		text_component:new("here will be filename.txt", 1, 2, 2, 2, 2, 0, .5),
+		text_component:new("", 1, 2, 2, 2, 2, 0, .5),
 		{
 			layout_update = function(c, rect) rect.y, rect.w = rect.parent.h - 12, rect.parent.w - 90 end;
 			mouse_enter = function(c, rect) rect:trigger_on_components("set_fill", 15) end;
@@ -58,42 +63,128 @@ function file_dialog_widget:new(ui_theme)
 	self.directory_hierarchy = ui_rect:new(3, 10, 100, 100, self.dialog_panel, {
 		layout_update = function(cmp, rect)
 			rect.h = rect.parent.h - rect.y - 14
+			self.directory_hierarchy_scroll_view.scroll_content.w = self.max_width
 		end
 	})
 	self.directory_hierarchy_scroll_view = self.directory_hierarchy:add_component(scroll_area_widget:new(ui_theme))
 
 	local line_height = 9
-	self.directory_hierarchy_scroll_view.scroll_content:add_component {
-		layout_update_size = function(comp, ui_rect)
-			ui_rect.h = #self.directory_hierarchy_list * line_height
-			ui_rect.w = self.max_width + 8
-		end;
-		draw = function(comp, ui_rect)
-			local x, y = ui_rect:to_world()
-			local cx1, cy1, cw, ch = clip_stack:current_rect()
-			local cy2 = cy1 + ch
-			local from = math.max(1, math.ceil((cy1 - y) / line_height))
-			local to = math.min(#self.directory_hierarchy_list, math.ceil((cy2 - y) / line_height))
-			for i = from, to do
-				local dir_info = self.directory_hierarchy_list[i]
-				local px = x + 4 * dir_info.level
-				local py = y + (i - 1) * line_height
-				pico8api:spr(dir_info.is_opened and ui_theme.icon.open_folder or ui_theme.icon.closed_folder, px, py)
-				pico8api:print(dir_info.file_name, px + 10, py + 2, 1)
+	self.directory_hierarchy_scroll_view.scroll_content:add_component(virtual_list_widget:new(2, 9,
+		function() return #self.directory_hierarchy_list end,
+		function(index)
+			local element = self.directory_hierarchy_list[index]
+			local function select(cmp, rect, mx, my, top)
+				if not top then return end
+				self.opened_directories[element.file_path] = true
+				self:set_directory(element.file_path)
 			end
-		end
-	}
 
+			-- print(index,#self.directory_hierarchy_list)
+			local rect = ui_rect:new(0, 0, 0, 0, nil, rectfill_component:new(nil, nil, .25))
+			local text_and_icon = ui_rect:new(element.level * self.indent_per_level + 8, 0, 10 + element.text_width, 9, rect,
+				sprite_component:new(element.is_opened and ui_theme.icon.open_folder or ui_theme.icon.closed_folder, 0),
+				text_component:new(element.file_name, 0, 0, 0, 0, 9, 0, .5),
+				{ was_triggered = select })
+			local toggle_open = ui_rect:new(element.level * self.indent_per_level, 0, 8, 8, rect,
+				sprite_component:new(element.is_opened and ui_theme.icon.tiny_triangle_down or ui_theme.icon.tiny_triangle_right, 3,
+					3),
+				{
+					was_triggered = function()
+						self.opened_directories[element.file_path] = not self.opened_directories[element.file_path]
+						self:set_directory(self.current_directory)
+					end
+				})
+			rect:add_component
+			{
+				mouse_enter = function(component, rect) rect:trigger_on_components("set_fill", 2) end;
+				mouse_exit = function(component, rect) rect:trigger_on_components("set_fill", nil) end;
+				was_triggered = select;
+			}
+			return rect
+		end))
+
+	self.files_view = ui_rect:new(105, 10, 100, 100, self.dialog_panel, {
+		layout_update = function(cmp, rect)
+			rect.h = rect.parent.h - rect.y - 14
+			rect.w = rect.parent.w - rect.x - 3
+		end
+	})
+	self.files_view_scroll_view = self.files_view:add_component(scroll_area_widget:new(ui_theme))
+	self.files_view_scroll_view.scroll_content:add_component(virtual_list_widget:new(2, 9,
+		function() return #self.file_list end,
+		function(index)
+			local element = self.file_list[index]
+			local rect = ui_rect:new(0, 0, 0, 0, nil, rectfill_component:new(nil, nil, .25))
+			ui_rect:new(0, 0, 100, 9, rect,
+				sprite_component:new(element.is_directory and ui_theme.icon.closed_folder or ui_theme.icon.generic_file),
+				text_component:new(element.file_name, 0, 0, 0, 0, 10, 0))
+			rect:add_component {
+				mouse_enter = function(c, rect) rect:trigger_on_components("set_fill", 2) end;
+				mouse_exit = function(c, rect) rect:trigger_on_components("set_fill", nil) end;
+				was_triggered = function()
+					if element.is_directory then
+						self:set_directory(element.file_path)
+						return
+					end
+					self:set_file_name(element.file_name)
+				end
+			}
+			return rect
+		end))
 
 	self:set_directory(love.filesystem.getWorkingDirectory())
 
 	return self
 end
 
+function file_dialog_widget:show(parent_rect, on_closed)
+	self:set_parent(parent_rect)
+	self.on_closed = on_closed
+end
+
+function file_dialog_widget:on_closed(selected_file)
+	print("Selected file for opening: ",selected_file)
+end
+
+function file_dialog_widget:set_file_name(name)
+	self.file_name:trigger_on_components("set_text", name)
+	self.current_file_name = name
+end
+
 function file_dialog_widget:set_directory(path)
-	local current_path = ""
+	if not path:match "/$" then path = path .. "/" end
+	if path == self.current_directory then return end
+	self.current_directory = path
+
+	self.directory_hierarchy_scroll_view.scroll_content:trigger_on_components "release_all"
+	self.files_view_scroll_view.scroll_content:trigger_on_components "release_all"
+
+	self:set_file_name("")
 
 	self.directory_hierarchy_list = {}
+	self.file_list = {}
+
+	local files = nativefs.getDirectoryItems(path)
+	table.sort(files, function(a, b) return a:lower() < b:lower() end)
+	for i = 1, #files do
+		local file_path = path .. files[i]
+		local info = nativefs.getInfo(file_path)
+		if info then
+			self.file_list[#self.file_list + 1] = {
+				file_path = file_path;
+				file_name = files[i];
+				is_directory = info.type == "directory";
+				is_file = info.type == "file";
+				size = info.size;
+				modtime = info.modtime;
+			}
+		end
+	end
+	table.sort(self.file_list, function(a, b)
+		if a.is_directory ~= b.is_directory then return a.is_directory end
+		return a.file_name:lower() < b.file_name:lower()
+	end)
+
 	self.max_width = 0
 	local function amend(current_path, level)
 		level = level + 1
@@ -102,15 +193,19 @@ function file_dialog_widget:set_directory(path)
 		for i = 1, #files do
 			local file_path = current_path .. files[i]
 			if nativefs.getInfo(file_path, "directory") then
-				local is_opened = file_path == path:sub(1, #file_path)
-				self.directory_hierarchy_list[#self.directory_hierarchy_list + 1] = {
+				local open_status = self.opened_directories[file_path]
+				local is_opened = (open_status ~= false and file_path == path:sub(1, #file_path)) or open_status
+				self.opened_directories[file_path] = is_opened
+				local element = {
 					level = level;
 					is_opened = is_opened;
 					file_path = file_path;
 					file_name = files[i];
 					directory = current_path;
+					text_width = pico8api:text_width(files[i]);
 				}
-				self.max_width = math.max(self.max_width, self.indent_per_level * level + pico8api:text_width(files[i]) + 10)
+				self.directory_hierarchy_list[#self.directory_hierarchy_list + 1] = element
+				self.max_width = math.max(self.max_width, self.indent_per_level * level + element.text_width + 23)
 				if is_opened then
 					amend(file_path .. "/", level + 1)
 				end
@@ -121,8 +216,9 @@ function file_dialog_widget:set_directory(path)
 	amend(path:match "[^/]+/", 0)
 end
 
-function file_dialog_widget:close()
+function file_dialog_widget:close(is_cancelled)
 	self.screen_rect:remove()
+	self:on_closed(not is_cancelled and (self.current_directory..self.current_file_name))
 end
 
 function file_dialog_widget:set_parent(ui_rect)
