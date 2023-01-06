@@ -50,6 +50,8 @@ There are different groups of methods that get called in certain orders, each ha
 - Mouse events
   - is_mouse_over(component, ui_rect, mouse_x, mouse_y): called each frame when the mouse is over the element
   - is_pressed_down(component, ui_rect, mouse_x, mouse_y): called each frame when the mouse is being pressed down - but only if this action was started ON that ui_rect and it keeps firing until the mouse button is released, regardless if the mouse is over that component or not
+  - mouse_enter(component, ui_rect, mouse_x, mouse_y): called when the mouse enters the component rectangle
+  - mouse_exit(component, ui_rect, mouse_x, mouse_y): called when the mouse exits the component rectangle
   - was_pressed_down(component, ui_rect, mouse_x, mouse_y): called once when the mouse is clicked on the element and it was visible, etc.
   - was_released(component, ui_rect, mouse_x, mouse_y): called once when the mouse button was released and only after was_pressed_down was called
   - was_triggered(component, ui_rect, mouse_x, mouse_y): called once when the mouse button was released while being over the component (usually defined as "click")
