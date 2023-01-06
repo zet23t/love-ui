@@ -39,6 +39,7 @@ ui_theme.icon = {
 	to_end = 39;
 	hierarchy = 41;
 	closed_folder = 42;
+	generic_file = 43;
 }
 
 function ui_theme:new()
