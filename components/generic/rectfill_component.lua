@@ -7,11 +7,12 @@ local class = require "love-util.class"
 ---@field border integer|nil
 local rectfill_component = class "rectfill_component":extends(require "love-ui.components.generic.ui_rect_component")
 
----@param fill integer pico8 color id for filling
+---@param fill integer|nil pico8 color id for filling
 ---@param border integer|nil pico8 color id for line, optional
+---@param alpha number|nil alpha to use when drawing border and fill
 ---@return rectfill_component
-function rectfill_component:new(fill, border)
-	return self:create { fill = fill or -1, border = border or -1 }
+function rectfill_component:new(fill, border, alpha)
+	return self:create { fill = fill or -1, border = border or -1, alpha = alpha }
 end
 
 function rectfill_component:draw(ui_rect)
@@ -26,7 +27,7 @@ function rectfill_component:set_alpha(alpha)
 	return self
 end
 
-function rectfill_component:set_fill(fill) self.fill = fill end
-function rectfill_component:set_border(border) self.border = border end
+function rectfill_component:set_fill(fill) self.fill = fill or -1 end
+function rectfill_component:set_border(border) self.border = border or -1 end
 
 return rectfill_component
