@@ -24,9 +24,12 @@ local function queue_call(name, f, ...)
 end
 
 local function flag_trigger(self, flag_name, mx, my)
-	if self.flags[flag_name] then
+	local flag = self.flags[flag_name]
+	if flag == true then
 		--require "log" ("?%s ",flag_name)
 		queue_call(flag_name, trigger, self.components, flag_name, self, mx, my)
+	elseif flag then
+		queue_call(flag_name, trigger, self.components, flag_name, self, mx, my, flag == self)
 	end
 	return flag_trigger
 end
@@ -67,6 +70,7 @@ function ui_rect:collect_hits(x, y, list)
 			end
 		end
 	end
+
 	if is_inside then
 		pico8api:add(list, self, 1)
 		list[self] = true
@@ -111,7 +115,7 @@ function ui_rect:update_flags(mx, my, hits)
 		flags.is_pressed_down = false
 		flags.was_released = true
 		if mouse_over then
-			flags.was_triggered = true
+			flags.was_triggered = hits[1]
 		end
 	end
 	trigger(self.components, "pre_draw", self)(self.children, "update_flags", mx, my, hits)(self.components, "post_draw")
