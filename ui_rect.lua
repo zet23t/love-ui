@@ -44,6 +44,7 @@ end
 ---@class ui_rect : object
 ---@field disabled boolean
 ---@field id string
+---@field parent ui_rect
 ---@field children ui_rect[]
 ---@field components ui_rect_component
 ---@field flags table
@@ -143,6 +144,9 @@ end
 ui_rect.to_front = ui_rect.to_pos
 
 function ui_rect:remove()
+	if not self.parent then
+		return
+	end
 	pico8api:del(self.parent.children, self)
 	self.parent = nil
 end
@@ -184,10 +188,19 @@ function ui_rect:update(mx, my)
 end
 
 function ui_rect:draw()
-	trigger(self.components, "pre_draw", self)(
-		self.components, "draw", self)(
-		self.children, "draw")(
-		self.components, "post_draw", self)
+	local cx, cy, cw, ch = clip_stack:current_rect()
+	local wx, wy = self:to_world(0, 0)
+	if wx < cx + cw and wy < cy + ch and wx + self.w >= cx and wy + self.h >= cy then
+		trigger(self.components, "pre_draw", self)(
+			self.components, "draw", self)(
+			self.children, "draw")(
+			self.components, "post_draw", self)
+	else
+		trigger(self.components, "pre_draw", self)(
+			self.children, "draw")(
+			self.components, "post_draw", self)
+	end
+
 end
 
 function ui_rect:to_world(x, y)
@@ -269,6 +282,10 @@ function ui_rect:get_child_by_id(id)
 end
 
 function ui_rect:set_parent(p)
+	if not p then
+		self:remove()
+		return
+	end
 	self.parent = p
 	pico8api:add(p.children, self)
 end
