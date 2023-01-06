@@ -38,8 +38,8 @@ function scroll_area_widget:init(rect)
 end
 
 function scroll_area_widget:is_mouse_over(rect)
-	self.scroll_bar_x_component:set_pos(uitk_vars.mouse_wheel_dx * self.mouse_wheel_factor + self.scroll_bar_x_component.pos)
-	self.scroll_bar_y_component:set_pos(uitk_vars.mouse_wheel_dy * self.mouse_wheel_factor + self.scroll_bar_y_component.pos)
+	self.scroll_bar_x_component:set_pos(-uitk_vars.mouse_wheel_dx * self.mouse_wheel_factor + self.scroll_bar_x_component.pos)
+	self.scroll_bar_y_component:set_pos(-uitk_vars.mouse_wheel_dy * self.mouse_wheel_factor + self.scroll_bar_y_component.pos)
 end
 
 function scroll_area_widget:layout_update(rect)
