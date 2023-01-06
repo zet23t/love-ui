@@ -35,17 +35,21 @@ function virtual_list_widget:layout_update_size(rect)
 	end
 end
 
+function virtual_list_widget:release_all()
+	self.release_all_on_update = true
+end
+
 ---@param rect ui_rect
 function virtual_list_widget:layout_update(rect)
 	local pw, ph = rect.parent:get_size()
 	local entry_size = self.list_entry_size
 	local ps = self.axis == 1 and pw or ph
 	local start_pos = self.axis == 1 and rect.x or rect.y
-	local start_index = math.floor(-start_pos / entry_size)
-	local end_index = math.ceil((ps - start_pos) / entry_size)
+	local start_index = math.max(1, math.floor(-start_pos / entry_size))
+	local end_index = math.min(self.fn_get_count(), math.ceil((ps - start_pos) / entry_size))
 
 	for i, ui_rect in pairs(self.active_elements) do
-		if i < start_index or i > end_index then
+		if i < start_index or i > end_index or self.release_all_on_update then
 			ui_rect:remove()
 			if self.fn_release_element then
 				self.fn_release_element(ui_rect)
@@ -54,7 +58,9 @@ function virtual_list_widget:layout_update(rect)
 		end
 	end
 
-	for i = start_index, math.min(end_index, self.fn_get_count()) do
+	self.release_all_on_update = false
+
+	for i = start_index, end_index do
 		if not self.active_elements[i] then
 			local element = self.fn_acquire_element_by_index(i)
 			self.active_elements[i] = element
