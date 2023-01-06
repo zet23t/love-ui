@@ -53,8 +53,8 @@ function scroll_area_widget:layout_update(rect)
 	self.diagonal_sash.x = w - 8
 	self.diagonal_sash.y = h - 8
 
-	self.scroll_content.x = -self.scroll_bar_x_component.pos
-	self.scroll_content.y = -self.scroll_bar_y_component.pos
+	self.scroll_content.x = math.ceil(-self.scroll_bar_x_component.pos + 1) -- +1 to compensate clip_component
+	self.scroll_content.y = math.ceil(-self.scroll_bar_y_component.pos + 1)
 	self.scroll_bar_x_component.range = self.scroll_content.w
 	self.scroll_bar_x_component.scope = self.scroll_area_view.w
 	self.scroll_bar_y_component.range = self.scroll_content.h
