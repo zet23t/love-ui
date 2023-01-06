@@ -32,7 +32,7 @@ function weighted_position_component:layout_update(ui_rect)
 	local pw, ph = ui_rect.parent:get_size()
 	pw, ph = pw - self.padding_right - self.padding_left, ph - self.padding_top - self.padding_bottom
 	local dw, dh = pw - w, ph - h
-	ui_rect.x, ui_rect.y = dw * self.wx + self.padding_left, dh * self.wy + self.padding_top
+	ui_rect.x, ui_rect.y = math.floor(dw * self.wx + self.padding_left + .5), math.floor(dh * self.wy + self.padding_top + .5)
 end
 
 return weighted_position_component
