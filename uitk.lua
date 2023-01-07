@@ -4,9 +4,16 @@ local uitk_vars = require "love-ui.uitk_vars"
 
 local cursor_normal = { id = 1, offset_x = -1, offset_y = -1 }
 local cursor_resize = { id = 17, offset_x = -4, offset_y = -4 }
+local cursor_hidden = { id = -1 }
 local cursor = cursor_normal
 
-local uitk = {}
+local uitk = {
+	cursors = {
+		cursor_normal = cursor_normal;
+		cursor_resize = cursor_resize;
+		cursor_hidden = cursor_hidden;
+	}
+}
 uitk._mt = { __index = uitk }
 
 function uitk:new()
@@ -36,7 +43,9 @@ function uitk:draw(root)
 		:recursive_trigger("layout_update")
 		:draw()
 	pico8api:clip()
-	pico8api:spr(cursor.id, x + cursor.offset_x, y + cursor.offset_y)
+	if cursor.id >= 0 then
+		pico8api:spr(cursor.id, x + cursor.offset_x, y + cursor.offset_y)
+	end
 end
 
 local function call_all(name)
@@ -77,6 +86,13 @@ function uitk:update(root)
 	prev_mouse_down = mouse_down
 	uitk_vars.mouse_wheel_dx = 0
 	uitk_vars.mouse_wheel_dy = 0
+	uitk_vars.previous_mouse_x = uitk_vars.mouse_x or 0
+	uitk_vars.previous_mouse_y = uitk_vars.mouse_y or 0
+	uitk_vars.mouse_x = x
+	uitk_vars.mouse_y = y
+	uitk_vars.mouse_dx = x - uitk_vars.previous_mouse_x
+	uitk_vars.mouse_dy = y - uitk_vars.previous_mouse_y
+
 end
 
 function uitk:mouse_wheelmoved(dx, dy)
@@ -93,9 +109,10 @@ end
 ---@return number mouse x
 ---@return number mouse y
 ---@return boolean true if primary pressed
-function uitk:get_mouse()
+function uitk:get_mouse(return_floating)
 	local x, y = love.mouse.getPosition()
-	x, y = floor(love.graphics.inverseTransformPoint(x, y))
+	x, y = love.graphics.inverseTransformPoint(x, y)
+	if not return_floating then x, y = floor(x + .5, y + .5) end
 	return x, y, love.mouse.isDown(1)
 end
 
