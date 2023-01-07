@@ -15,25 +15,25 @@ end
 function menu_widget:init(ui_rect)
 	local menu_c = self
 	ui_rect:add_component(rectfill_component:new(6, 5))
-	local y = 2
+	local y = 4
 	local maxw = 10
 	local menu = self.menu
 	if menu.get_menu then
 		menu = assert(menu:get_menu())
 	end
 	for k, v in desuffixed_pairs(menu) do
-		local w = pico8api:text_width(k) + 20
+		local w = pico8api:text_width(k) + 40
 		maxw = max(w, maxw)
 	end
 	for k, v, icon in desuffixed_pairs(menu) do
-		local entry = ui_rect:new(1, y, maxw, k == "" and 1 or 8, ui_rect)
+		local entry = ui_rect:new(1, y, maxw, k == "" and 2 or 16, ui_rect)
 		if k ~= "" then
 			local r = entry:add_component(rectfill_component:new(6))
 			entry:add_component {
 				mouse_enter = function() r.fill = 7 end,
 				mouse_exit = function() r.fill = 6 end,
 			}
-			entry:add_component(text_component:new(k, 0, 0, 0, 0, 11, 0))
+			entry:add_component(text_component:new(k, 0, 0, 0, 0, 22, 0))
 			local is_table = type(v) == "table"
 			local event_handler = entry:add_component {
 				was_triggered = function(self, ui_rect_e, mx, my)
@@ -55,25 +55,25 @@ function menu_widget:init(ui_rect)
 				function event_handler:draw(ui_rect)
 					local x, y = ui_rect:to_world(ui_rect.w - 5, 1)
 					for i = 0, 6 do
-						pico8api:rectfill(x, y + i, x + 3 - abs(i - 3), y + i, 5)
+						pico8api:rectfill(x, y + i, x + 6 - abs(i - 6), y + i, 5)
 					end
 				end
 
 				function event_handler:is_mouse_over(ui_rect)
-					local x, y = ui_rect:to_world(ui_rect.w - 2)
-					submenu_c = ui_rect:new(x, y, 10, 10, ui_rect:root()):add_component(menu_widget:new(v, menu_c))
+					local x, y = ui_rect:to_world(ui_rect.w - 4)
+					submenu_c = ui_rect:new(x, y, 20, 20, ui_rect:root()):add_component(menu_widget:new(v, menu_c))
 				end
 			end
 			if icon then
 				entry:add_component(sprite_component:new(icon, 1))
 			end
-			y = y + 9
+			y = y + 18
 		else
 			entry:add_component(rectfill_component:new(5))
-			y = y + 3
+			y = y + 6
 		end
 	end
-	ui_rect:set_rect(nil, nil, maxw + 2, y + 1)
+	ui_rect:set_rect(nil, nil, maxw + 4, y + 2)
 	--local x,y = ui_rect:to_world()
 	if ui_rect.x + ui_rect.w > pico8api:screen_size() then
 		ui_rect.x = pico8api:screen_size() - ui_rect.w

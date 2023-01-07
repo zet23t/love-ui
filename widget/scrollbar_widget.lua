@@ -45,8 +45,8 @@ end
 ---@param ui_theme ui_theme
 function scrollbar_widget:new_themed(axis, ui_theme)
 	return self:new(axis, ui_theme:scrollbar_shaft_skin(), ui_theme:scrollbar_slider_skin(), ui_theme:button_skin(),
-		sprite_component:new(axis == 1 and ui_theme.icon.tiny_triangle_left or ui_theme.icon.tiny_triangle_up, 2, 2),
-		sprite_component:new(axis == 1 and ui_theme.icon.tiny_triangle_right or ui_theme.icon.tiny_triangle_down, 2, 2)
+		sprite_component:new(axis == 1 and ui_theme.icon.tiny_triangle_left or ui_theme.icon.tiny_triangle_up, 4, 4),
+		sprite_component:new(axis == 1 and ui_theme.icon.tiny_triangle_right or ui_theme.icon.tiny_triangle_down, 4, 4)
 	)
 end
 

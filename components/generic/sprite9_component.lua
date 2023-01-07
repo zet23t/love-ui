@@ -25,15 +25,16 @@ function sprite9_component:draw(ui_rect)
 		local h1, h2, h3 = t, sh - t - b, b
 
 		local quads = {owner = self}
-		quads[1] = love.graphics.newQuad(x1, y1, w1, h1, 128, 128)
-		quads[2] = love.graphics.newQuad(x2, y1, w2, h1, 128, 128)
-		quads[3] = love.graphics.newQuad(x3, y1, w3, h1, 128, 128)
-		quads[4] = love.graphics.newQuad(x1, y2, w1, h2, 128, 128)
-		quads[5] = love.graphics.newQuad(x2, y2, w2, h2, 128, 128)
-		quads[6] = love.graphics.newQuad(x3, y2, w3, h2, 128, 128)
-		quads[7] = love.graphics.newQuad(x1, y3, w1, h3, 128, 128)
-		quads[8] = love.graphics.newQuad(x2, y3, w2, h3, 128, 128)
-		quads[9] = love.graphics.newQuad(x3, y3, w3, h3, 128, 128)
+		local sheet_size = pico8api.sheet_size
+		quads[1] = love.graphics.newQuad(x1, y1, w1, h1, sheet_size, sheet_size)
+		quads[2] = love.graphics.newQuad(x2, y1, w2, h1, sheet_size, sheet_size)
+		quads[3] = love.graphics.newQuad(x3, y1, w3, h1, sheet_size, sheet_size)
+		quads[4] = love.graphics.newQuad(x1, y2, w1, h2, sheet_size, sheet_size)
+		quads[5] = love.graphics.newQuad(x2, y2, w2, h2, sheet_size, sheet_size)
+		quads[6] = love.graphics.newQuad(x3, y2, w3, h2, sheet_size, sheet_size)
+		quads[7] = love.graphics.newQuad(x1, y3, w1, h3, sheet_size, sheet_size)
+		quads[8] = love.graphics.newQuad(x2, y3, w2, h3, sheet_size, sheet_size)
+		quads[9] = love.graphics.newQuad(x3, y3, w3, h3, sheet_size, sheet_size)
 		self.quads = quads
 	end
 	local x, y = ui_rect:to_world()

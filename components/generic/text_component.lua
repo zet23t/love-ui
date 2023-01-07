@@ -27,7 +27,7 @@ function text_component:draw(ui_rect)
 	local maxpos_x = ui_rect.w - r - l
 	local maxpos_y = ui_rect.h - t - b
 	x = x + l + self.align_x * maxpos_x - w * self.align_x
-	y = y + t + self.align_y * maxpos_y - 6 * self.align_y + 1
+	y = y + t + self.align_y * maxpos_y - 12 * self.align_y + 1
 
 	pico8api:print(self.text, x, y, self.color)
 end

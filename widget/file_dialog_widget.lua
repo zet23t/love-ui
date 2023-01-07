@@ -36,40 +36,43 @@ function file_dialog_widget:new(ui_theme)
 
 	self.opened_directories = {}
 
-	self.dialog_panel = ui_rect:new(0, 0, 300, 200, self.screen_rect, weighted_position_component:new(),
-		parent_limited_size_component:new(300, 200))
+	local width = 600
+	local height = 400
+
+	self.dialog_panel = ui_rect:new(0, 0, width, height, self.screen_rect, weighted_position_component:new(),
+		parent_limited_size_component:new(width, height))
 	ui_theme:decorate_window_skin(self.dialog_panel, "Open file")
 
-	self.close_x_button = ui_rect:new(0, 0, 8, 8, self.dialog_panel, weighted_position_component:new(1, 0, 1, 2))
+	self.close_x_button = ui_rect:new(0, 0, 16, 16, self.dialog_panel, weighted_position_component:new(1, 0, 2, 4))
 	ui_theme:decorate_sprite(self.close_x_button, ui_theme.icon.close_x)
 	ui_theme:decorate_on_click(self.close_x_button, function() self:close(true) end)
 
-	self.cancel_button = ui_rect:new(0, 0, 40, 9, self.dialog_panel, weighted_position_component:new(1, 1, 0, 3, 3))
+	self.cancel_button = ui_rect:new(0, 0, 80, 18, self.dialog_panel, weighted_position_component:new(1, 1, 0, 6, 6))
 	ui_theme:decorate_button_skin(self.cancel_button, "Cancel", function() self:close(true) end)
 
-	self.open_button = ui_rect:new(0, 0, 40, 9, self.dialog_panel, weighted_position_component:new(1, 1, 0, 45, 3))
+	self.open_button = ui_rect:new(0, 0, 80, 18, self.dialog_panel, weighted_position_component:new(1, 1, 0, 90, 6))
 	ui_theme:decorate_button_skin(self.open_button, "Open", function() self:close() end)
 
-	self.file_name = ui_rect:new(3, 0, 0, 9, self.dialog_panel,
+	self.file_name = ui_rect:new(3, 0, 0, 18, self.dialog_panel,
 		rectfill_component:new(7, 1),
 		text_component:new("", 1, 2, 2, 2, 2, 0, .5),
 		{
-			layout_update = function(c, rect) rect.y, rect.w = rect.parent.h - 12, rect.parent.w - 90 end;
+			layout_update = function(c, rect) rect.y, rect.w = rect.parent.h - 24, rect.parent.w - 180 end;
 			mouse_enter = function(c, rect) rect:trigger_on_components("set_fill", 15) end;
 			mouse_exit = function(c, rect) rect:trigger_on_components("set_fill", 7) end;
 		}
 	)
 
-	self.directory_hierarchy = ui_rect:new(3, 10, 100, 100, self.dialog_panel, {
+	self.directory_hierarchy = ui_rect:new(6, 20, 200, 100, self.dialog_panel, {
 		layout_update = function(cmp, rect)
-			rect.h = rect.parent.h - rect.y - 14
+			rect.h = rect.parent.h - rect.y - 28
 			self.directory_hierarchy_scroll_view.scroll_content.w = self.max_width
 		end
 	})
 	self.directory_hierarchy_scroll_view = self.directory_hierarchy:add_component(scroll_area_widget:new(ui_theme))
 
 	local line_height = 9
-	self.directory_hierarchy_scroll_view.scroll_content:add_component(virtual_list_widget:new(2, 9,
+	self.directory_hierarchy_scroll_view.scroll_content:add_component(virtual_list_widget:new(2, 18,
 		function() return #self.directory_hierarchy_list end,
 		function(index)
 			local element = self.directory_hierarchy_list[index]
@@ -81,11 +84,11 @@ function file_dialog_widget:new(ui_theme)
 
 			-- print(index,#self.directory_hierarchy_list)
 			local rect = ui_rect:new(0, 0, 0, 0, nil, rectfill_component:new(nil, nil, .25))
-			local text_and_icon = ui_rect:new(element.level * self.indent_per_level + 8, 0, 10 + element.text_width, 9, rect,
+			local text_and_icon = ui_rect:new(element.level * self.indent_per_level + 16, 0, 10 + element.text_width, 18, rect,
 				sprite_component:new(element.is_opened and ui_theme.icon.open_folder or ui_theme.icon.closed_folder, 0),
-				text_component:new(element.file_name, 0, 0, 0, 0, 9, 0, .5),
+				text_component:new(element.file_name, 0, 0, 0, 0, 18, 0, .5),
 				{ was_triggered = select })
-			local toggle_open = ui_rect:new(element.level * self.indent_per_level, 0, 8, 8, rect,
+			local toggle_open = ui_rect:new(element.level * self.indent_per_level, 0, 16, 16, rect,
 				sprite_component:new(element.is_opened and ui_theme.icon.tiny_triangle_down or ui_theme.icon.tiny_triangle_right, 3,
 					3),
 				{
@@ -103,21 +106,21 @@ function file_dialog_widget:new(ui_theme)
 			return rect
 		end))
 
-	self.files_view = ui_rect:new(105, 10, 100, 100, self.dialog_panel, {
+	self.files_view = ui_rect:new(210, 20, 100, 100, self.dialog_panel, {
 		layout_update = function(cmp, rect)
-			rect.h = rect.parent.h - rect.y - 14
-			rect.w = rect.parent.w - rect.x - 3
+			rect.h = rect.parent.h - rect.y - 28
+			rect.w = rect.parent.w - rect.x - 6
 		end
 	})
 	self.files_view_scroll_view = self.files_view:add_component(scroll_area_widget:new(ui_theme))
-	self.files_view_scroll_view.scroll_content:add_component(virtual_list_widget:new(2, 9,
+	self.files_view_scroll_view.scroll_content:add_component(virtual_list_widget:new(2, 18,
 		function() return #self.file_list end,
 		function(index)
 			local element = self.file_list[index]
 			local rect = ui_rect:new(0, 0, 0, 0, nil, rectfill_component:new(nil, nil, .25))
-			ui_rect:new(0, 0, 100, 9, rect,
+			ui_rect:new(0, 0, 100, 18, rect,
 				sprite_component:new(element.is_directory and ui_theme.icon.closed_folder or ui_theme.icon.generic_file),
-				text_component:new(element.file_name, 0, 0, 0, 0, 10, 0))
+				text_component:new(element.file_name, 0, 0, 0, 0, 20, 0))
 			rect:add_component {
 				mouse_enter = function(c, rect) rect:trigger_on_components("set_fill", 2) end;
 				mouse_exit = function(c, rect) rect:trigger_on_components("set_fill", nil) end;
@@ -143,7 +146,7 @@ function file_dialog_widget:show(parent_rect, on_closed)
 end
 
 function file_dialog_widget:on_closed(selected_file)
-	print("Selected file for opening: ",selected_file)
+	print("Selected file for opening: ", selected_file)
 end
 
 function file_dialog_widget:set_file_name(name)
@@ -218,7 +221,7 @@ end
 
 function file_dialog_widget:close(is_cancelled)
 	self.screen_rect:remove()
-	self:on_closed(not is_cancelled and (self.current_directory..self.current_file_name))
+	self:on_closed(not is_cancelled and (self.current_directory .. self.current_file_name))
 end
 
 function file_dialog_widget:set_parent(ui_rect)

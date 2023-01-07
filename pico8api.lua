@@ -1,6 +1,8 @@
 local floor = require "love-math.floor"
 local pico8api = {}
 pico8api.colors = require "love-ui.pico8_colors"
+pico8api.sheet_size = 256
+pico8api.icon_size = 16
 
 local function with_color(fn, r, g, b, a)
 	local r0, g0, b0, a0 = love.graphics.getColor()
@@ -31,7 +33,7 @@ function pico8api:load(sprite_sheet, font_sheet)
 	self.font_sheet = love.graphics.newImage(font_sheet)
 	self.quads = {}
 	for i = 0, 127 do
-		self.quads[i] = love.graphics.newQuad(i % 16 * 8, math.floor(i / 16) * 8, 8, 8, 128, 128)
+		self.quads[i] = love.graphics.newQuad(i % 16 * self.icon_size, math.floor(i / 16) * self.icon_size, self.icon_size, self.icon_size, self.sheet_size, self.sheet_size)
 	end
 	self.text_batch = love.graphics.newSpriteBatch(self.font_sheet, 1000, "dynamic")
 end
@@ -45,7 +47,7 @@ function pico8api:print(text, x, y, color)
 	for i = 1, #text do
 		local id = string.byte(text, i)
 		self.text_batch:add(self.quads[id], tx, 0)
-		tx = tx + (id < 128 and 4 or 8)
+		tx = tx + (id < 128 and self.icon_size/2 or self.icon_size)
 	end
 	love.graphics.draw(self.text_batch, floor(x, y))
 
@@ -56,9 +58,9 @@ function pico8api:text_width(s)
 	local w = 0
 	for i = 1, #s do
 		if string.byte(s, i) >= 128 then
-			w = w + 8
+			w = w + self.icon_size
 		else
-			w = w + 4
+			w = w + self.icon_size / 2
 		end
 	end
 	return w - 1

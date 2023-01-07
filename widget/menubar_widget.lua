@@ -16,14 +16,14 @@ function menubar_widget:new(menubar, yoffset)
 end
 
 function menubar_widget:init(ui_rect)
-	local bar = ui_rect:new(0,0,10,10,ui_rect,rectfill_component:new(6), {
-		layout_update = function(cmp, ui_rect) ui_rect:set_rect(0,self.yoffset,ui_rect.parent.w,8) end
+	local bar = ui_rect:new(0,0,20,20,ui_rect,rectfill_component:new(6), {
+		layout_update = function(cmp, ui_rect) ui_rect:set_rect(0,self.yoffset,ui_rect.parent.w,16) end
 	})
 	local x = 2
 	for k, v in desuffixed_pairs(self.menubar) do
 		-- require "log"("%s %s %s",tostring(k),tostring(v), tostring(0))
 		
-		local w = pico8api:text_width(k) + 6
+		local w = pico8api:text_width(k) + 12
 		local start_x = x
 		x = x + w + 5
 		local menu_c, entry
@@ -31,7 +31,7 @@ function menubar_widget:init(ui_rect)
 		entry = ui_rect:new(0, 0, 10, 10, ui_rect,
 			rf, {
 				layout_update = function(cmp, ui_rect)
-					ui_rect:set_rect(start_x, self.yoffset, w + 2, 8)
+					ui_rect:set_rect(start_x, self.yoffset, w + 4, 16)
 				end,
 				mouse_enter = function()
 					rf.fill = 7
@@ -46,7 +46,7 @@ function menubar_widget:init(ui_rect)
 					if type(v) == "function" then
 						return v()
 					end
-					local x, y = ui_rect:to_world(start_x, entry.y + 8)
+					local x, y = ui_rect:to_world(start_x, entry.y + 16)
 					menu_c = ui_rect:new(x, y, 10, 10, ui_rect:root()):add_component(menu_widget:new(v))
 				end
 			}, text_component:new(k, 0,0,0,1))

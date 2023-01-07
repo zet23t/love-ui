@@ -47,7 +47,7 @@ function ui_theme:new()
 end
 
 function ui_theme:scrollbar_shaft_skin()
-	local s9 = sprite9_component:new(72, 0, 8, 8, 2, 2, 2, 2)
+	local s9 = sprite9_component:new(72*2, 0, 16, 16, 4, 4, 4, 4)
 	return s9
 end
 
@@ -56,30 +56,30 @@ function ui_theme:scroll_area_view()
 end
 
 function ui_theme:scrollbar_slider_skin()
-	local s9 = sprite9_component:new(16, 0, 8, 8, 2, 2, 2, 2)
+	local s9 = sprite9_component:new(16*2, 0, 16, 16, 4, 4, 4, 4)
 	return s9
 end
 
 function ui_theme:button_skin()
-	local s9 = sprite9_component:new(16, 0, 8, 8, 2, 2, 2, 2);
+	local s9 = sprite9_component:new(16*2, 0, 16, 16, 4, 4, 4, 4);
 
 	s9.mouse_enter = function(self)
-		self.sx = 32
+		self.sx = 32*2
 		self.is_dirty = true
 	end
 
 	s9.mouse_exit = function(self)
-		self.sx = 16
+		self.sx = 16*2
 		self.is_dirty = true
 	end
 
 	s9.is_pressed_down = function(self)
-		self.sx = 24
+		self.sx = 24*2
 		self.is_dirty = true
 	end
 
 	s9.was_released = function(self, rect)
-		self.sx = rect.flags.is_mouse_over and 32 or 16
+		self.sx = rect.flags.is_mouse_over and 32*2 or 16*2
 		self.is_dirty = true
 	end
 
@@ -111,13 +111,13 @@ function ui_theme:decorate_sprite(ui_rect, icon_id)
 end
 
 function ui_theme:window_skin()
-	return sprite9_component:new(64, 0, 8, 16, 10, 3, 3, 3)
+	return sprite9_component:new(64*2, 0, 8*2, 16*2, 10*2, 3*2, 3*2, 3*2)
 end
 
 function ui_theme:decorate_window_skin(ui_rect, caption)
 	ui_rect:add_component(self:window_skin())
 	if caption then
-		ui_rect:add_component(text_component:new(caption, 1, 1, 5, 0, 3, 0, 0))
+		ui_rect:add_component(text_component:new(caption, 1, 2, 10, 0, 6, 0, 0))
 	end
 end
 
