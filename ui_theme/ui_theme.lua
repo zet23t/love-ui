@@ -86,10 +86,15 @@ function ui_theme:button_skin()
 	return s9
 end
 
-function ui_theme:decorate_button_skin(ui_rect, caption, on_click)
+function ui_theme:decorate_button_skin(ui_rect, caption, sprite, on_click)
 	ui_rect:add_component(self:button_skin())
 	if caption then
 		ui_rect:add_component(text_component:new(caption, 1, 0, 0, 0, 0, .5, .5))
+	end
+	if type(sprite) == "function" then
+		on_click = sprite
+	elseif sprite then
+		ui_rect:add_component(sprite_component:new(sprite, 2, 2))
 	end
 	if on_click then
 		ui_rect:add_component{ was_triggered = on_click }
@@ -108,6 +113,17 @@ end
 
 function ui_theme:decorate_sprite(ui_rect, icon_id)
 	ui_rect:add_component(sprite_component:new(icon_id))
+end
+
+function ui_theme:panel_skin()
+	return sprite9_component:new(0, 48, 16, 32, 18, 6, 6, 6)
+end
+
+function ui_theme:decorate_panel_skin(ui_rect, caption)
+	ui_rect:add_component(self:panel_skin())
+	if caption then
+		ui_rect:add_component(text_component:new(caption, 1, 2, 0, 0, 0, 0.5, 0))
+	end
 end
 
 function ui_theme:window_skin()
