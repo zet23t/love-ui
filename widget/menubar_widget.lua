@@ -16,13 +16,13 @@ function menubar_widget:new(menubar, yoffset)
 end
 
 function menubar_widget:init(ui_rect)
-	local bar = ui_rect:new(0,0,20,20,ui_rect,rectfill_component:new(6), {
-		layout_update = function(cmp, ui_rect) ui_rect:set_rect(0,self.yoffset,ui_rect.parent.w,16) end
+	local bar = ui_rect:new(0, 0, 20, 20, ui_rect, rectfill_component:new(6), {
+		layout_update = function(cmp, ui_rect) ui_rect:set_rect(0, self.yoffset, ui_rect.parent.w, 16) end
 	})
 	local x = 2
 	for k, v in desuffixed_pairs(self.menubar) do
 		-- require "log"("%s %s %s",tostring(k),tostring(v), tostring(0))
-		
+
 		local w = pico8api:text_width(k) + 12
 		local start_x = x
 		x = x + w + 5
@@ -49,7 +49,7 @@ function menubar_widget:init(ui_rect)
 					local x, y = ui_rect:to_world(start_x, entry.y + 16)
 					menu_c = ui_rect:new(x, y, 10, 10, ui_rect:root()):add_component(menu_widget:new(v))
 				end
-			}, text_component:new(k, 0,0,0,1))
+			}, text_component:new(k, 0, 0, 0, 1))
 	end
 end
 
