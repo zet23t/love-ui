@@ -3,13 +3,19 @@ local drag_component = require "love-util.class" "drag_component":extends(requir
 local function donothing() end
 
 function drag_component:new(dragged_rect)
-	return drag_component:create {dragged_rect = dragged_rect}
+	return drag_component:create {
+		dragged_rect = dragged_rect;
+	}
+end
+
+function drag_component:on_position_updated(rect, x, y)
 end
 
 function drag_component:is_pressed_down(rect, mx, my)
 	rect = self.dragged_rect or rect
 	rect.x = rect.x + mx - self.mx
 	rect.y = rect.y + my - self.my
+	self:on_position_updated(rect, rect.x, rect.y)
 end
 
 function drag_component:was_pressed_down(ui_rect, mx, my)
