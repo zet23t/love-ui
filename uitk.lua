@@ -20,6 +20,7 @@ function uitk:new()
 	local self = setmetatable({}, self._mt)
 	self.context = {
 		was_mouse_pressed = false,
+		was_mouse_dragged = false,
 		was_mouse_released = false,
 		queued_updates = {},
 	}
@@ -65,16 +66,25 @@ function uitk:update(root)
 	mouse_down = b
 	uitk_vars.was_mouse_pressed = mouse_down and not prev_mouse_down
 	uitk_vars.was_mouse_released = not mouse_down and prev_mouse_down
+	if uitk_vars.was_mouse_pressed then
+		uitk_vars.mouse_press_start_x = x
+		uitk_vars.mouse_press_start_y = y
+		uitk_vars.mouse_was_dragged = false
+	end
+	if mouse_down and not uitk_vars.mouse_was_dragged then
+		local dx, dy = uitk_vars.mouse_press_start_x - x, uitk_vars.mouse_press_start_y - y
+		uitk_vars.mouse_was_dragged = dx*dx+dy*dy > 9
+	end
 	-- print("??",mouse_down,uitk_vars.was_mouse_pressed)
 	local hits = {}
 	root:do_layout()
-		:collect_hits(x, y, hits)
+	:collect_hits(x, y, hits)
 	root:update_flags(x, y, hits)
-
+	
 	uitk_vars.queued_updates = {}
 	-- the update call is collecting information which calls need to be done
 	root:update(x, y)
-
+	
 	-- it is important to execute all callbacks orderly one by one after another
 	call_all
 	"mouse_exit" "mouse_enter"
@@ -82,7 +92,7 @@ function uitk:update(root)
 	"was_released" "was_pressed_down" "was_triggered"
 	"is_pressed_down"
 	"update"
-
+	
 	prev_mouse_down = mouse_down
 	uitk_vars.mouse_wheel_dx = 0
 	uitk_vars.mouse_wheel_dy = 0
@@ -93,6 +103,11 @@ function uitk:update(root)
 	uitk_vars.mouse_dx = x - uitk_vars.previous_mouse_x
 	uitk_vars.mouse_dy = y - uitk_vars.previous_mouse_y
 
+	if uitk_vars.was_mouse_released then
+		uitk_vars.mouse_press_start_x = nil
+		uitk_vars.mouse_press_start_y = nil
+		uitk_vars.mouse_was_dragged = false
+	end
 end
 
 function uitk:mouse_wheelmoved(dx, dy)
