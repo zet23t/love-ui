@@ -131,6 +131,13 @@ function ui_rect:trigger_on_components(name, ...)
 	trigger(self.components, name, ...)
 end
 
+function ui_rect:trigger_on_components_and_children(name, ...)
+	trigger(self.components, name, ...)
+	for i=1,#self.children do
+		self.children[i]:trigger_on_components_and_children(name, ...)
+	end
+end
+
 function ui_rect:root()
 	return self.parent and self.parent:root() or self
 end
