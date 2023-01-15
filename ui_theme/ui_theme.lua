@@ -40,6 +40,8 @@ ui_theme.icon = {
 	hierarchy = 41;
 	closed_folder = 42;
 	generic_file = 43;
+	output = 44;
+	input = 45;
 }
 
 function ui_theme:new()
@@ -47,39 +49,39 @@ function ui_theme:new()
 end
 
 function ui_theme:scrollbar_shaft_skin()
-	local s9 = sprite9_component:new(72*2, 0, 16, 16, 4, 4, 4, 4)
+	local s9 = sprite9_component:new(72 * 2, 0, 16, 16, 4, 4, 4, 4)
 	return s9
 end
 
 function ui_theme:scroll_area_view()
-	return rectfill_component:new(7,1)
+	return rectfill_component:new(7, 1)
 end
 
 function ui_theme:scrollbar_slider_skin()
-	local s9 = sprite9_component:new(16*2, 0, 16, 16, 4, 4, 4, 4)
+	local s9 = sprite9_component:new(16 * 2, 0, 16, 16, 4, 4, 4, 4)
 	return s9
 end
 
 function ui_theme:button_skin()
-	local s9 = sprite9_component:new(16*2, 0, 16, 16, 4, 4, 4, 4);
+	local s9 = sprite9_component:new(16 * 2, 0, 16, 16, 4, 4, 4, 4);
 
 	s9.mouse_enter = function(self)
-		self.sx = 32*2
+		self.sx = 32 * 2
 		self.is_dirty = true
 	end
 
 	s9.mouse_exit = function(self)
-		self.sx = 16*2
+		self.sx = 16 * 2
 		self.is_dirty = true
 	end
 
 	s9.is_pressed_down = function(self)
-		self.sx = 24*2
+		self.sx = 24 * 2
 		self.is_dirty = true
 	end
 
 	s9.was_released = function(self, rect)
-		self.sx = rect.flags.is_mouse_over and 32*2 or 16*2
+		self.sx = rect.flags.is_mouse_over and 32 * 2 or 16 * 2
 		self.is_dirty = true
 	end
 
@@ -97,7 +99,7 @@ function ui_theme:decorate_button_skin(ui_rect, caption, sprite, on_click)
 		ui_rect:add_component(sprite_component:new(sprite, 2, 2))
 	end
 	if on_click then
-		ui_rect:add_component{ was_triggered = on_click }
+		ui_rect:add_component { was_triggered = on_click }
 	end
 end
 
@@ -127,7 +129,7 @@ function ui_theme:decorate_panel_skin(ui_rect, caption)
 end
 
 function ui_theme:window_skin()
-	return sprite9_component:new(64*2, 0, 8*2, 16*2, 10*2, 3*2, 3*2, 3*2)
+	return sprite9_component:new(64 * 2, 0, 8 * 2, 16 * 2, 10 * 2, 3 * 2, 3 * 2, 3 * 2)
 end
 
 function ui_theme:decorate_window_skin(ui_rect, caption)
@@ -135,6 +137,20 @@ function ui_theme:decorate_window_skin(ui_rect, caption)
 	if caption then
 		ui_rect:add_component(text_component:new(caption, 1, 2, 10, 0, 6, 0, 0))
 	end
+end
+
+function ui_theme:decorate_toggle_skin(ui_rect, caption, state, on_toggle)
+	local sprite = ui_rect:add_component(sprite_component:new(state and self.icon.toggle_set or self.icon.toggle_not_set, 0, (ui_rect.h - 16) / 2))
+	ui_rect:add_component(text_component:new(caption or "", 1, 2, 0, 0, 20, 0))
+	ui_rect:add_component({
+		was_released = function(_, rect)
+			state = not state
+			sprite:set_sprite(state and self.icon.toggle_set or self.icon.toggle_not_set)
+			if rect.flags.is_mouse_over and on_toggle then
+				on_toggle(state)
+			end
+		end
+	})
 end
 
 return ui_theme
