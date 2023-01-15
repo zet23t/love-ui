@@ -22,4 +22,8 @@ function sprite_component:draw(ui_rect)
 	pico8api:spr(self.sprite_id, x, y, self.w, self.h)
 end
 
+function sprite_component:set_sprite(sprite_id)
+	self.sprite_id = sprite_id or 0
+end
+
 return sprite_component
