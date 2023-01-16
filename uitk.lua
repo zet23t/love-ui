@@ -77,8 +77,7 @@ function uitk:update(root)
 	end
 	-- print("??",mouse_down,uitk_vars.was_mouse_pressed)
 	local hits = {}
-	root:do_layout()
-	:collect_hits(x, y, hits)
+	root:do_layout():collect_hits(x, y, hits)
 	root:update_flags(x, y, hits)
 	
 	uitk_vars.queued_updates = {}
