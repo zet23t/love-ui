@@ -37,6 +37,15 @@ function uitk:set_cursor(c)
 	cursor = c
 end
 
+function uitk:keypressed(key)
+	self:load_context()
+	uitk_vars.last_key_pressed = key
+end
+function uitk:textinput(key)
+	self:load_context()
+	uitk_vars.last_text_input = key
+end
+
 function uitk:draw(root)
 	self:load_context()
 	local x, y = uitk:get_mouse()
@@ -107,6 +116,9 @@ function uitk:update(root)
 		uitk_vars.mouse_press_start_y = nil
 		uitk_vars.mouse_was_dragged = false
 	end
+
+	uitk_vars.last_key_pressed = nil
+	uitk_vars.last_text_input = nil
 end
 
 function uitk:mouse_wheelmoved(dx, dy)
