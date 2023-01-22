@@ -24,12 +24,23 @@ function textfield_component:new(text, color, t, r, b, l, align_x, align_y)
 	}
 end
 
+function textfield_component:is_text_valid(text)
+	return true
+end
+
+function textfield_component:on_text_updated()
+end
+
+function textfield_component:on_focus_lost()
+end
+
 function textfield_component:mouse_enter()
 	self.has_focus = true
 end
 
 function textfield_component:mouse_exit()
 	self.has_focus = false
+	self:on_focus_lost()
 end
 
 function textfield_component:was_triggered(rect, mx, my)
@@ -71,9 +82,15 @@ function textfield_component:update(rect)
 	elseif uitk_vars.last_key_pressed == "backspace" and self.caret_position > 0 then
 		self.text = self.text:sub(1, self.caret_position - 1) .. self.text:sub(self.caret_position + 1)
 		self.caret_position = self.caret_position - 1
+		self:on_text_updated()
 	elseif uitk_vars.last_text_input then
-		self.text = self.text:sub(1, self.caret_position) .. uitk_vars.last_text_input .. self.text:sub(self.caret_position + 1)
-		self.caret_position = self.caret_position + 1
+		local new_text = self.text:sub(1, self.caret_position) ..
+			uitk_vars.last_text_input .. self.text:sub(self.caret_position + 1)
+		if self:is_text_valid(new_text) then
+			self.text = new_text
+			self.caret_position = self.caret_position + 1
+			self:on_text_updated()
+		end
 	end
 end
 
