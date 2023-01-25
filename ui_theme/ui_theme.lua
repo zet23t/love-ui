@@ -42,6 +42,7 @@ ui_theme.icon = {
 	generic_file = 43;
 	output = 44;
 	input = 45;
+	cursor_horizontal = 49;
 }
 
 function ui_theme:new()
