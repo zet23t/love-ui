@@ -43,6 +43,7 @@ ui_theme.icon = {
 	output = 44;
 	input = 45;
 	cursor_horizontal = 49;
+	burger_menu = 50;
 }
 
 function ui_theme:new()
