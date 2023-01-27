@@ -73,10 +73,16 @@ function menu_widget:init(ui_rect)
 			y = y + 6
 		end
 	end
+	
 	ui_rect:set_rect(nil, nil, maxw + 4, y + 2)
 	--local x,y = ui_rect:to_world()
-	if ui_rect.x + ui_rect.w > pico8api:screen_size() then
-		ui_rect.x = pico8api:screen_size() - ui_rect.w
+	local w, h = pico8api:screen_size()
+	if ui_rect.x + ui_rect.w > w then
+		ui_rect.x = w - ui_rect.w
+	end
+
+	if ui_rect.y + ui_rect.h > h then
+		ui_rect.y = h - ui_rect.h
 	end
 end
 
