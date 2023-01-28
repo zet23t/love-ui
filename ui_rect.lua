@@ -1,4 +1,4 @@
-local rect_contains = require "love-math.rect_contains"
+local rect_contains = require "love-math.geom.2d.rect_contains"
 local clamp = require "love-math.clamp"
 local proxy_instance = require "love-util.proxy_instance"
 local uitk_vars = require "love-ui.uitk_vars"
