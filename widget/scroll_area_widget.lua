@@ -44,6 +44,16 @@ function scroll_area_widget:is_mouse_over(rect)
 		self.scroll_bar_y_component.pos)
 end
 
+function scroll_area_widget:set_position(x,y)
+	self.scroll_bar_x_component:set_pos(x)
+	self.scroll_bar_y_component:set_pos(y)
+end
+
+function scroll_area_widget:increase_position(x,y)
+	self.scroll_bar_x_component:set_pos(x + self.scroll_bar_x_component.pos)
+	self.scroll_bar_y_component:set_pos(y + self.scroll_bar_y_component.pos)
+end
+
 function scroll_area_widget:layout_update(rect)
 	local w, h = rect:get_size()
 	self.scroll_area_view.w = w - 7 * 2
