@@ -21,15 +21,15 @@ function text_component:new(text, color, t, r, b, l, align_x, align_y)
 end
 
 function text_component:draw(ui_rect)
-	local x, y = ui_rect:to_world()
+	local x0, y0 = ui_rect:to_world()
 	local w = pico8api:text_width(self.text)
 	local t, r, b, l = self.t, self.r, self.b, self.l
 	local maxpos_x = ui_rect.w - r - l
 	local maxpos_y = ui_rect.h - t - b
-	x = x + l + self.align_x * maxpos_x - w * self.align_x
-	y = y + t + self.align_y * maxpos_y - 12 * self.align_y + 1
+	local x = x0 + l + self.align_x * maxpos_x - w * self.align_x
+	local y = y0 + t + self.align_y * maxpos_y - 12 * self.align_y + 1
 
-	pico8api:print(self.text, x, y, self.color)
+	pico8api:print(self.text, x, y, self.color, x0, y0, x0 + ui_rect.w, y0 + ui_rect.h)
 end
 
 function text_component:set_text(text)
