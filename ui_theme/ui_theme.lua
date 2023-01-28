@@ -42,8 +42,13 @@ ui_theme.icon = {
 	generic_file = 43;
 	output = 44;
 	input = 45;
+	panel = 46;
+	import = 47;
+	export = 63;
 	cursor_horizontal = 49;
 	burger_menu = 50;
+	star_filled = 51;
+	star_outline = 52;
 }
 
 function ui_theme:new()
