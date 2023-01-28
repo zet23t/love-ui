@@ -33,21 +33,32 @@ function pico8api:load(sprite_sheet, font_sheet)
 	self.font_sheet = love.graphics.newImage(font_sheet)
 	self.quads = {}
 	for i = 0, 127 do
-		self.quads[i] = love.graphics.newQuad(i % 16 * self.icon_size, math.floor(i / 16) * self.icon_size, self.icon_size, self.icon_size, self.sheet_size, self.sheet_size)
+		self.quads[i] = love.graphics.newQuad(i % 16 * self.icon_size, math.floor(i / 16) * self.icon_size, self.icon_size,
+			self.icon_size, self.sheet_size, self.sheet_size)
 	end
 	self.text_batch = love.graphics.newSpriteBatch(self.font_sheet, 1000, "dynamic")
 end
 
-function pico8api:print(text, x, y, color)
+function pico8api:print(text, x, y, color, clip_min_x, clip_min_y, clip_max_x, clip_max_y)
+	local size = self.icon_size
+	if clip_min_x and (y > clip_max_y or y + size < clip_min_y) then
+		return
+	end
 	local r0, g0, b0, a0 = love.graphics.getColor()
 	love.graphics.setColor(unpack(self.colors[color or 0]))
-
+	
+	if clip_min_x then
+		clip_min_x, clip_max_x = clip_min_x - x, clip_max_x - x
+	end
+	
 	self.text_batch:clear()
 	local tx = 0
 	for i = 1, #text do
 		local id = string.byte(text, i)
-		self.text_batch:add(self.quads[id], tx, 0)
-		tx = tx + (id < 128 and self.icon_size/2 or self.icon_size)
+		if not clip_min_x or (tx + size >= clip_min_x and tx <= clip_max_x) then
+			self.text_batch:add(self.quads[id], tx, 0)
+		end
+		tx = tx + (id < 128 and size / 2 or size)
 	end
 	love.graphics.draw(self.text_batch, floor(x, y))
 
