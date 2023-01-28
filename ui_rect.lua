@@ -242,9 +242,9 @@ function ui_rect:get_size()
 end
 
 ---Add a variable number of components to the ui_rect
----@param cmp ui_rect_component
----@param ... ui_rect_component
----@return ... ui_rect_component
+---@param cmp ui_rect_component|table
+---@param ... ui_rect_component|table
+---@return ... ui_rect_component|table
 function ui_rect:add_component(cmp, ...)
 	if cmp then
 		pico8api:add(self.components, cmp)
