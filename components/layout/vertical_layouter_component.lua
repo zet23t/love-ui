@@ -1,6 +1,12 @@
 ---@class vertical_layouter_component : ui_rect_component
 local vertical_layouter_component = require "love-util.class" "vertical_layouter_component":extends(require "love-ui.components.generic.ui_rect_component")
 
+---@param donot_update_size boolean
+---@param t number
+---@param r number
+---@param b number
+---@param l number
+---@return vertical_layouter_component
 function vertical_layouter_component:new(donot_update_size, t, r, b, l)
 	local instance = self:create {
 		t = t or 0;
@@ -14,6 +20,11 @@ function vertical_layouter_component:new(donot_update_size, t, r, b, l)
 	return instance
 end
 
+function vertical_layouter_component:set_horizontal_expand_enabled(enabled)
+	self.horizontal_expand_enabled = enabled
+	return self
+end
+
 ---@param rect ui_rect
 function vertical_layouter_component:layout_update_size(rect)
 	local h = self.t + self.b
@@ -21,6 +32,9 @@ function vertical_layouter_component:layout_update_size(rect)
 	for i = 1, #rect.children do
 		local child = rect.children[i]
 		h = h + child.h
+		if self.horizontal_expand_enabled then
+			child.w = rect.w
+		end
 		w = math.max(w, child.w)
 	end
 	rect.h = h
