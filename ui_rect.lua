@@ -199,6 +199,10 @@ function ui_rect:update(mx, my)
 end
 
 function ui_rect:draw()
+	if self.disabled then
+		return
+	end
+	
 	local cx, cy, cw, ch = clip_stack:current_rect()
 	local wx, wy = self:to_world(0, 0)
 	if wx < cx + cw and wy < cy + ch and wx + self.w >= cx and wy + self.h >= cy then
