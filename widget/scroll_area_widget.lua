@@ -49,6 +49,10 @@ function scroll_area_widget:set_position(x,y)
 	self.scroll_bar_y_component:set_pos(y)
 end
 
+function scroll_area_widget:get_position()
+	return self.scroll_bar_x_component.pos, self.scroll_bar_y_component.pos
+end
+
 function scroll_area_widget:increase_position(x,y)
 	self.scroll_bar_x_component:set_pos(x + self.scroll_bar_x_component.pos)
 	self.scroll_bar_y_component:set_pos(y + self.scroll_bar_y_component.pos)
