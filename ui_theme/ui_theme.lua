@@ -108,6 +108,7 @@ function ui_theme:decorate_button_skin(ui_rect, caption, sprite, on_click)
 	if on_click then
 		ui_rect:add_component { was_triggered = on_click }
 	end
+	return ui_rect
 end
 
 function ui_theme:decorate_on_click(ui_rect, on_click)
