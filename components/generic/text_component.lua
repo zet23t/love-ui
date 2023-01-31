@@ -29,7 +29,13 @@ function text_component:draw(ui_rect)
 	local x = x0 + l + self.align_x * maxpos_x - w * self.align_x
 	local y = y0 + t + self.align_y * maxpos_y - 12 * self.align_y + 1
 
-	pico8api:print(self.text, x, y, self.color, x0, y0, x0 + ui_rect.w, y0 + ui_rect.h)
+	local min_x, min_y, max_x, max_y = x0 + l,
+		y0 + t, 
+		x0 + ui_rect.w - r, y0 + ui_rect.h - b
+	-- pico8api:rect(min_x, min_y, max_x, max_y,1)
+	-- pico8api:rect(x, y, w + x, y + 16,1)
+	-- pico8api:rect(x0, y0, ui_rect.w + x0, y0 + ui_rect.h,2)
+	pico8api:print(self.text, x, y, self.color, min_x, min_y, max_x, max_y)
 end
 
 function text_component:set_text(text)
