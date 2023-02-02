@@ -49,6 +49,8 @@ ui_theme.icon = {
 	burger_menu = 50;
 	star_filled = 51;
 	star_outline = 52;
+	big_blue_x = 53;
+	big_blue_dash = 54;
 }
 
 function ui_theme:new()
