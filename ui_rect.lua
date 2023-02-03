@@ -9,9 +9,11 @@ local uitk = require "love-ui.uitk"
 local function trigger(cmps, name, ...)
 	for i = 1, #cmps do
 		local c = cmps[i]
-		local f = c[name]
-		if f then
-			f(c, ...)
+		if not c.disabled then
+			local f = c[name]
+			if f then
+				f(c, ...)
+			end
 		end
 	end
 	return trigger
