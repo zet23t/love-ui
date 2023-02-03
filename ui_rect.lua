@@ -332,16 +332,16 @@ function ui_rect:set_enabled(is_enabled)
 	self.disabled = not is_enabled
 end
 
----@param x number
----@param y number
----@param w number
----@param h number
+---@param x number|nil
+---@param y number|nil
+---@param w number|nil
+---@param h number|nil
 ---@param parent ui_rect|nil
 ---@param ... table
 ---@return ui_rect
 function ui_rect:new(x, y, w, h, parent, ...)
 	local self = ui_rect:create {
-		x = x, y = y, w = w, h = h,
+		x = x or 0, y = y or 0, w = w or 0, h = h or 0,
 		flags = {},
 		components = {},
 		children = {},
