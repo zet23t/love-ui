@@ -84,8 +84,23 @@ function pico8api:rect(x, y, x2, y2, color, alpha_override)
 	end, r, g, b, alpha_override or a)
 end
 
-function pico8api:spr(id, x, y, w, h)
-	love.graphics.draw(self.sprite_sheet, self.quads[id], math.floor(x), math.floor(y))
+---@param id integer
+---@param x number
+---@param y number
+---@param u number|nil 
+---@param v number|nil 
+---@param w number|nil 
+---@param h number|nil 
+---@param sheet love.Image|nil
+function pico8api:spr(id, x, y, u, v, w, h, sheet)
+	sheet = sheet or self.sprite_sheet
+	local quad
+	if w and u and v and h then
+		quad = love.graphics.newQuad(u, v, w, h, sheet:getWidth(), sheet:getHeight())
+	else
+		quad = self.quads[id]
+	end
+	love.graphics.draw(sheet or self.sprite_sheet, quad, math.floor(x), math.floor(y))
 end
 
 function pico8api:deli(t, i)
