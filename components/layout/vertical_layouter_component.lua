@@ -1,11 +1,11 @@
 ---@class vertical_layouter_component : ui_rect_component
 local vertical_layouter_component = require "love-util.class" "vertical_layouter_component":extends(require "love-ui.components.generic.ui_rect_component")
 
----@param donot_update_size boolean
----@param t number
----@param r number
----@param b number
----@param l number
+---@param donot_update_size boolean|nil
+---@param t number|nil
+---@param r number|nil
+---@param b number|nil
+---@param l number|nil
 ---@return vertical_layouter_component
 function vertical_layouter_component:new(donot_update_size, t, r, b, l)
 	local instance = self:create {
