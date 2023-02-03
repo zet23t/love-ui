@@ -64,6 +64,7 @@ function scroll_area_widget:layout_update(rect)
 	local enabled_y = self.scroll_content.h > self.scroll_area_view.h
 	self.scroll_bar_x:set_enabled(enabled_x)
 	self.scroll_bar_y:set_enabled(enabled_y)
+	self.diagonal_sash:set_enabled(enabled_x and enabled_y)
 
 	if not enabled_x and not enabled_y then
 		self.scroll_area_view.w = w
