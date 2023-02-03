@@ -60,6 +60,17 @@ end
 
 function scroll_area_widget:layout_update(rect)
 	local w, h = rect:get_size()
+	local enabled_x = self.scroll_content.w > self.scroll_area_view.w
+	local enabled_y = self.scroll_content.h > self.scroll_area_view.h
+	self.scroll_bar_x:set_enabled(enabled_x)
+	self.scroll_bar_y:set_enabled(enabled_y)
+
+	if not enabled_x and not enabled_y then
+		self.scroll_area_view.w = w
+		self.scroll_area_view.h = h
+		return
+	end
+
 	self.scroll_area_view.w = w - 7 * 2
 	self.scroll_area_view.h = h - 7 * 2
 	self.scroll_bar_x.y = h - 7 * 2
@@ -68,6 +79,7 @@ function scroll_area_widget:layout_update(rect)
 	self.scroll_bar_y.h = h - 7 * 2
 	self.diagonal_sash.x = w - 8 * 2
 	self.diagonal_sash.y = h - 8 * 2
+
 
 	self.scroll_content.x = math.ceil(-self.scroll_bar_x_component.pos + 1) -- +1 to compensate clip_component
 	self.scroll_content.y = math.ceil(-self.scroll_bar_y_component.pos + 1)
