@@ -16,8 +16,24 @@ function text_component:new(text, color, t, r, b, l, align_x, align_y)
 		text = text or "", color = color or 7,
 		l = l or 0, r = r or 0, t = t or 0, b = b or 0,
 		align_x = align_x or 0.5,
-		align_y = align_y or 0.5
+		align_y = align_y or 0.5,
+		rotation = 0
 	}
+end
+
+function text_component:set_rotation(rotation)
+	self.rotation = rotation or self.rotation
+	return self
+end
+
+local function rotate(rotation, x0,y0, x, y, ...)
+	local dx, dy = x - x0, y - y0
+	local s, c = math.sin(rotation), math.cos(rotation)
+	dx, dy = s * dy + c * dx, s * dx + c * dy
+	if ... then
+		return x0 + dx, y0 + dy, rotate(rotation, x0, y0, ...)
+	end
+	return x0 + dx, y0 + dy
 end
 
 function text_component:draw(ui_rect)
@@ -30,12 +46,18 @@ function text_component:draw(ui_rect)
 	local y = y0 + t + self.align_y * maxpos_y - 12 * self.align_y + 1
 
 	local min_x, min_y, max_x, max_y = x0 + l,
-		y0 + t, 
+		y0 + t,
 		x0 + ui_rect.w - r, y0 + ui_rect.h - b
 	-- pico8api:rect(min_x, min_y, max_x, max_y,1)
 	-- pico8api:rect(x, y, w + x, y + 16,1)
 	-- pico8api:rect(x0, y0, ui_rect.w + x0, y0 + ui_rect.h,2)
-	pico8api:print(self.text, x, y, self.color, min_x, min_y, max_x, max_y)
+	if self.rotation ~= 0 then
+		x,y, min_x, min_y, max_x, max_y = rotate(self.rotation, x0, y0, x,y, min_x, min_y, max_x, max_y)
+		-- min_x, min_y = rotate(self.rotation, x,y,x0,y0)
+		-- pico8api:rect(x,y,max_x, max_y, 1)
+		
+	end
+	pico8api:print(self.text, x, y, self.color, min_x, min_y, max_x, max_y, self.rotation)
 end
 
 function text_component:set_text(text)

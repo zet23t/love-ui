@@ -39,7 +39,7 @@ function pico8api:load(sprite_sheet, font_sheet)
 	self.text_batch = love.graphics.newSpriteBatch(self.font_sheet, 1000, "dynamic")
 end
 
-function pico8api:print(text, x, y, color, clip_min_x, clip_min_y, clip_max_x, clip_max_y)
+function pico8api:print(text, x, y, color, clip_min_x, clip_min_y, clip_max_x, clip_max_y, rot)
 	local size = self.icon_size
 	if clip_min_x and (y > clip_max_y or y + size < clip_min_y) then
 		return
@@ -55,12 +55,14 @@ function pico8api:print(text, x, y, color, clip_min_x, clip_min_y, clip_max_x, c
 	local tx = 0
 	for i = 1, #text do
 		local id = string.byte(text, i)
-		if not clip_min_x or (tx + size >= clip_min_x and tx <= clip_max_x) then
+		if not clip_min_x or rot ~= 0 or (tx + size >= clip_min_x and tx <= clip_max_x) then
 			self.text_batch:add(self.quads[id], tx, 0)
 		end
 		tx = tx + (id < 128 and size / 2 or size)
 	end
-	love.graphics.draw(self.text_batch, floor(x, y))
+	local off = 5
+	x,y = floor(x,y)
+	love.graphics.draw(self.text_batch, x+off, y+off, rot, 1, 1, off, off)
 
 	love.graphics.setColor(r0, g0, b0, a0)
 end
