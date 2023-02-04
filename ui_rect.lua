@@ -174,8 +174,12 @@ function ui_rect:remove_all_children()
 	self.children = {}
 end
 
-function ui_rect:do_layout()
+function ui_rect:do_layout_size_update()
 	return self:recursive_trigger("layout_update_size")
+end
+
+function ui_rect:do_layout()
+	return self:do_layout_size_update()
 		:recursive_trigger("layout_update")
 end
 

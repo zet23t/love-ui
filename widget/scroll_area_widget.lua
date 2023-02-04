@@ -29,7 +29,8 @@ function scroll_area_widget:init(rect)
 	self.rect = rect
 	self.diagonal_sash = ui_rect:new(0, 0, 16, 16, rect, rectfill_component:new(7),
 		sprite_component:new(self.ui_theme.icon.diagonal_sash))
-	self.scroll_area_view = ui_rect:new(0, 0, 0, 0, rect, self.ui_theme:scroll_area_view(), clip_component:new(1, 1, 1, 1))
+	self.scroll_area_view = ui_rect:new(0, 0, 0, 0, rect, self.ui_theme:scroll_area_view())
+	self.scroll_area_view:add_component(clip_component:new(1, 1, 1, 1))
 	self.scroll_bar_x = ui_rect:new(0, 0, 14, 14, rect)
 	self.scroll_bar_y = ui_rect:new(0, 0, 14, 14, rect)
 	self.scroll_bar_x_component = self.scroll_bar_x:add_component(scrollbar_widget:new_themed(1, self.ui_theme))

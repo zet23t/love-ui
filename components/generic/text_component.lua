@@ -42,11 +42,11 @@ end
 
 local function get_wrapped_text(self, text, max_width)
 	local line = ""
-	local line_width = 0
+	local line_width = self.firstline_indent
 	local lines = {}
 	for fragment, word in text:gmatch "(%s*(%S+))" do
 		local width = pico8api:text_width(fragment)
-		if line_width + width > max_width and line_width > 0 then
+		if line_width + width >= max_width and line_width > 0 then
 			lines[#lines + 1] = { line, line_width }
 			line = word
 			line_width = pico8api:text_width(line) + self.newline_indent
@@ -62,9 +62,16 @@ local function get_wrapped_text(self, text, max_width)
 end
 
 local function layout_update_size(self, rect)
+	if self.cached_text == self.text and self.cached_w == rect.w and self.cached_h == rect.h then
+		return
+	end
 	local maxpos_x = rect.w - self.r - self.l
 	local lines = get_wrapped_text(self, self.text, maxpos_x)
 	rect.h = self.line_height * #lines + self.line_spacing * (#lines - 1) + self.b + self.t
+
+	self.cached_text = self.text
+	self.cached_w = rect.w
+	self.cached_h = rect.h
 end
 
 function text_component:set_fitting_height(enabled)
@@ -118,14 +125,16 @@ function text_component:draw(ui_rect)
 
 	if w > maxpos_x and self.is_multiline_enabled then
 		local lines = get_wrapped_text(self, self.text, maxpos_x)
+
 		local line_offset = self.line_height + self.line_spacing
 		h = self.line_height * #lines + self.line_spacing * (#lines - 1)
 		for i,line in ipairs(lines) do 
-			print_line(line[1], line[2], i > 1 and self.newline_indent or self.firstline_indent, (i - 1) * line_offset)
+			local indent = i > 1 and self.newline_indent or self.firstline_indent
+			print_line(line[1], line[2], indent, (i - 1) * line_offset)
 		end
 		-- print(self.text)
 	else
-		print_line(self.text, w, 0, 0)
+		print_line(self.text, w, self.firstline_indent, 0)
 	end
 end
 
