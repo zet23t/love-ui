@@ -46,11 +46,11 @@ function pico8api:print(text, x, y, color, clip_min_x, clip_min_y, clip_max_x, c
 	end
 	local r0, g0, b0, a0 = love.graphics.getColor()
 	love.graphics.setColor(unpack(self.colors[color or 0]))
-	
+
 	if clip_min_x then
 		clip_min_x, clip_max_x = clip_min_x - x, clip_max_x - x
 	end
-	
+
 	self.text_batch:clear()
 	local tx = 0
 	for i = 1, #text do
@@ -61,8 +61,8 @@ function pico8api:print(text, x, y, color, clip_min_x, clip_min_y, clip_max_x, c
 		tx = tx + (id < 128 and size / 2 or size)
 	end
 	local off = 5
-	x,y = floor(x,y)
-	love.graphics.draw(self.text_batch, x+off, y+off, rot, 1, 1, off, off)
+	x, y = floor(x, y)
+	love.graphics.draw(self.text_batch, x + off, y + off, rot, 1, 1, off, off)
 
 	love.graphics.setColor(r0, g0, b0, a0)
 end
@@ -89,10 +89,10 @@ end
 ---@param id integer
 ---@param x number
 ---@param y number
----@param u number|nil 
----@param v number|nil 
----@param w number|nil 
----@param h number|nil 
+---@param u number|nil
+---@param v number|nil
+---@param w number|nil
+---@param h number|nil
 ---@param sheet love.Image|nil
 function pico8api:spr(id, x, y, u, v, w, h, sheet)
 	sheet = sheet or self.sprite_sheet

@@ -8,10 +8,10 @@ local parent_size_matcher_component = require "love-util.class" "parent_size_mat
 ---Top, right, bottom, left distances relative to parent component size. If values passed are "true"
 ---the current width / height of the ui_rect is used and the rect is not expanded. If all values
 ---passed are "true", this component does essentially nothing.
----@param t number|true
----@param r number|true
----@param b number|true
----@param l number|true
+---@param t number|true|nil
+---@param r number|true|nil
+---@param b number|true|nil
+---@param l number|true|nil
 ---@return parent_size_matcher_component
 function parent_size_matcher_component:new(t, r, b, l)
 	return parent_size_matcher_component:create { t = t or 0, r = r or 0, b = b or 0, l = l or 0 }
