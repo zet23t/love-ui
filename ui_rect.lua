@@ -124,7 +124,7 @@ function ui_rect:update_flags(mx, my, hits)
 end
 
 function ui_rect:recursive_trigger(name, ...)
-	if self.disabled then return end
+	if self.disabled then return self end
 	trigger(self.components, name, self, ...)(self.children, "recursive_trigger", name, ...)
 	return self
 end
