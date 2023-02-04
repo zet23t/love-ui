@@ -50,6 +50,7 @@ end
 ---@field disabled boolean
 ---@field id string
 ---@field parent ui_rect
+---@field ignore_layouting boolean
 ---@field children ui_rect[]
 ---@field components ui_rect_component
 ---@field flags table
@@ -138,6 +139,11 @@ function ui_rect:trigger_on_components_and_children(name, ...)
 	for i = 1, #self.children do
 		self.children[i]:trigger_on_components_and_children(name, ...)
 	end
+end
+
+function ui_rect:set_ignore_layouting(enabled)
+	self.ignore_layouting = enabled
+	return self
 end
 
 function ui_rect:root()
@@ -355,6 +361,7 @@ function ui_rect:new(x, y, w, h, parent, ...)
 		self:set_parent(parent)
 	end
 	self:add_component(...)
+	
 	return self
 end
 

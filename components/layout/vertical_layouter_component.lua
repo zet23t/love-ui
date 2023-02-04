@@ -29,14 +29,16 @@ end
 function vertical_layouter_component:layout_update_size(rect)
 	local h = self.t + self.b
 	local w = self.l + self.r
-	
+
 	for i = 1, #rect.children do
 		local child = rect.children[i]
-		if self.horizontal_expand_enabled then
-			child.w = rect.w
+		if not child.ignore_layouting then
+			if self.horizontal_expand_enabled then
+				child.w = rect.w
+			end
+			child:do_layout_size_update()
+			h = h + child.h
 		end
-		child:do_layout_size_update()
-		h = h + child.h
 		-- print(child.h)
 		-- w = math.max(w, child.w)
 	end

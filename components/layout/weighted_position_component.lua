@@ -26,13 +26,21 @@ function weighted_position_component:new(wx, wy, padding_top, padding_right, pad
 	}
 end
 
+function weighted_position_component:set_alignto_rect(rect)
+	self.alignto_rect = rect
+	return self
+end
+
 function weighted_position_component:layout_update(ui_rect)
-	if not ui_rect.parent then return end
+	local alignto = self.alignto_rect or ui_rect.parent
+	if not alignto then return end
 	local w, h = ui_rect.w, ui_rect.h
-	local pw, ph = ui_rect.parent:get_size()
+	local pw, ph = alignto:get_size()
 	pw, ph = pw - self.padding_right - self.padding_left, ph - self.padding_top - self.padding_bottom
 	local dw, dh = pw - w, ph - h
-	ui_rect.x, ui_rect.y = math.floor(dw * self.wx + self.padding_left + .5), math.floor(dh * self.wy + self.padding_top + .5)
+	local awx, awy = alignto:to_world(0, 0)
+	local lx, ly = ui_rect.parent:to_local(awx, awy)
+	ui_rect.x, ui_rect.y = math.floor(dw * self.wx + self.padding_left + .5) - lx, math.floor(dh * self.wy + self.padding_top + .5) - ly
 end
 
 return weighted_position_component
