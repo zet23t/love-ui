@@ -11,7 +11,7 @@ local pico8api = require "love-ui.pico8api"
 ---@field l number
 local text_component = require "love-util.class" "text_component":extends(require "love-ui.components.generic.ui_rect_component")
 text_component.line_height = 12
-text_component.line_spacing = 2
+text_component.line_spacing = 4
 text_component.newline_indent = 0
 text_component.firstline_indent = 0
 
