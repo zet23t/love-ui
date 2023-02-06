@@ -130,6 +130,12 @@ function ui_rect:recursive_trigger(name, ...)
 	return self
 end
 
+function ui_rect:recursive_trigger_children_first(name, ...)
+	if self.disabled then return self end
+	trigger(self.children, "recursive_trigger", name, ...)(self.components, name, self, ...)
+	return self
+end
+
 function ui_rect:trigger_on_components(name, ...)
 	trigger(self.components, name, ...)
 end
@@ -181,12 +187,12 @@ function ui_rect:remove_all_children()
 end
 
 function ui_rect:do_layout_size_update()
-	return self:recursive_trigger("layout_update_size")
+	return self:recursive_trigger_children_first("layout_update_size")
 end
 
 function ui_rect:do_layout()
 	return self:do_layout_size_update()
-		:recursive_trigger("layout_update")
+		:recursive_trigger_children_first("layout_update")
 end
 
 function ui_rect:update(mx, my)
