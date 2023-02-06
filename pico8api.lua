@@ -62,6 +62,7 @@ function pico8api:print(text, x, y, color, clip_min_x, clip_min_y, clip_max_x, c
 	end
 	local off = 5
 	x, y = floor(x, y)
+	-- self:rect(clip_min_x, clip_min_y, clip_max_x, clip_max_y,1)
 	love.graphics.draw(self.text_batch, x + off, y + off, rot, 1, 1, off, off)
 
 	love.graphics.setColor(r0, g0, b0, a0)
@@ -76,7 +77,7 @@ function pico8api:text_width(s)
 			w = w + self.icon_size / 2
 		end
 	end
-	return w - 1
+	return w
 end
 
 function pico8api:rect(x, y, x2, y2, color, alpha_override)
