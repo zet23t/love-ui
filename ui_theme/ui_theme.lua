@@ -97,10 +97,15 @@ function ui_theme:button_skin()
 	return s9
 end
 
+---@param ui_rect ui_rect
+---@param caption string|nil
+---@param sprite integer|nil
+---@param on_click function|nil
+---@return ui_rect
 function ui_theme:decorate_button_skin(ui_rect, caption, sprite, on_click)
 	ui_rect:add_component(self:button_skin())
 	if caption then
-		ui_rect:add_component(text_component:new(caption, 1, 0, 0, 0, 0, .5, .5))
+		ui_rect:add_component(text_component:new(caption, 1, 2, 6, 2, 6, .5, .5))
 	end
 	if type(sprite) == "function" then
 		on_click = sprite
@@ -142,11 +147,15 @@ function ui_theme:window_skin()
 	return sprite9_component:new(64 * 2, 0, 8 * 2, 16 * 2, 10 * 2, 3 * 2, 3 * 2, 3 * 2)
 end
 
+---@param ui_rect ui_rect
+---@param caption any
+---@return ui_rect
 function ui_theme:decorate_window_skin(ui_rect, caption)
 	ui_rect:add_component(self:window_skin())
 	if caption then
 		ui_rect:add_component(text_component:new(caption, 1, 2, 10, 0, 6, 0, 0))
 	end
+	return ui_rect
 end
 
 function ui_theme:decorate_toggle_skin(ui_rect, caption, state, on_toggle)
