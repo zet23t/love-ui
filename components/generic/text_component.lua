@@ -39,13 +39,15 @@ function text_component:set_multiline(enabled)
 	self.is_multiline_enabled = enabled
 	return self
 end
+
 local function get_wrapped_text(self, text, max_width)
 	local line = ""
 	local line_width = self.firstline_indent
 	local lines = {}
+	
 	for fragment, word in text:gmatch "(%s*(%S+))" do
 		local width = pico8api:text_width(fragment)
-		if line_width + width > max_width and line_width > 0 then
+		if (line_width + width > max_width) and (line_width > 0) then
 			lines[#lines + 1] = { line, line_width }
 			line = word
 			line_width = pico8api:text_width(line) + self.newline_indent
@@ -61,11 +63,26 @@ local function get_wrapped_text(self, text, max_width)
 end
 
 local function layout_update_size(self, rect)
+	local lines
+	if self.is_fitting_width then
+		lines = get_wrapped_text(self, self.text, self.wrapping_width)
+		local max_width = 0
+		for i=1,#lines do
+			max_width = math.max(max_width, lines[i][2])
+		end
+		rect.w = max_width + self.r + self.l
+	end
+	
+	if not self.is_fitting_height then 
+		return 
+	end
+	
 	if self.cached_text == self.text and self.cached_w == rect.w and self.cached_h == rect.h then
 		return
 	end
+
 	local maxpos_x = rect.w - self.r - self.l
-	local lines = get_wrapped_text(self, self.text, maxpos_x)
+	lines = lines or get_wrapped_text(self, self.text, maxpos_x)
 	rect.h = self.line_height * #lines + self.line_spacing * (#lines - 1) + self.b + self.t
 
 	self.cached_text = self.text
@@ -75,9 +92,16 @@ end
 
 function text_component:set_fitting_height(enabled)
 	self.is_fitting_height = enabled
-	self.layout_update_size = enabled and layout_update_size
+	self.layout_update_size = (self.is_fitting_height or self.is_fitting_width) and layout_update_size
 	return self
 end
+
+function text_component:set_fitting_width(enabled, wrapping_width)
+	self.is_fitting_width = enabled
+	self.wrapping_width = wrapping_width or 1000
+	self.layout_update_size = (self.is_fitting_height or self.is_fitting_width) and layout_update_size
+end
+
 
 function text_component:set_rotation(rotation)
 	self.rotation = rotation or self.rotation
