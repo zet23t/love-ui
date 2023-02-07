@@ -34,7 +34,7 @@ function vertical_layouter_component:layout_update_size(rect)
 		local child = rect.children[i]
 		if not child.ignore_layouting then
 			if self.horizontal_expand_enabled then
-				child.w = rect.w
+				child.w = rect.w - w
 			end
 			child:do_layout_size_update()
 			h = h + child.h
@@ -49,9 +49,10 @@ end
 ---@param rect ui_rect
 function vertical_layouter_component:layout_update(rect)
 	local pos = self.t
+	local l, r = self.l, self.r
 	for i = 1, #rect.children do
 		local child = rect.children[i]
-		child.x = math.floor((rect.w - self.r - self.l - child.w) / 2)
+		child.x = math.floor((rect.w - r - l - child.w) / 2 + l)
 		child.y = pos
 		pos = pos + child.h
 	end
