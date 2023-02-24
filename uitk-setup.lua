@@ -4,6 +4,9 @@ local ui_rect      = require "love-ui.ui_rect"
 local late_command = require "love-util.late_command"
 
 local canvas = uitk:new()
+
+love.keyboard.keysPressed = {}
+
 return function(options)
 	local root_rect
 	local function call(name,...)
