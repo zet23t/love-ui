@@ -41,23 +41,25 @@ function text_component:set_multiline(enabled)
 end
 
 local function get_wrapped_text(self, text, max_width)
-	local line = ""
-	local line_width = self.firstline_indent
 	local lines = {}
 	
-	for fragment, word in text:gmatch "(%s*(%S+))" do
-		local width = pico8api:text_width(fragment)
-		if (line_width + width > max_width) and (line_width > 0) then
-			lines[#lines + 1] = { line, line_width }
-			line = word
-			line_width = pico8api:text_width(line) + self.newline_indent
-		else
-			line_width = line_width + width
-			line = line .. fragment
+	for text_line,line_break in text:gmatch "([^\n]*)\n?" do
+		local line = ""
+		local line_width = self.firstline_indent
+		for fragment, word in text_line:gmatch "(%s*(%S+))" do
+			local width = pico8api:text_width(fragment)
+			if (line_width + width > max_width) and (line_width > 0) then
+				lines[#lines + 1] = { line, line_width }
+				line = word
+				line_width = pico8api:text_width(line) + self.newline_indent
+			else
+				line_width = line_width + width
+				line = line .. fragment
+			end
 		end
-	end
-	if #line > 0 then
-		lines[#lines + 1] = { line, line_width }
+		if #line > 0 then
+			lines[#lines + 1] = { line, line_width }
+		end
 	end
 	return lines
 end
