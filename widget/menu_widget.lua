@@ -6,6 +6,8 @@ local desuffixed_pairs = require "love-util.desuffix_pairs"
 local max = math.max
 local abs = math.abs
 
+---@class menu_widget : ui_rect_component
+---@field menu table A table describing the menu structure
 local menu_widget = require "love-util.class" "menu_widget":extends(require "love-ui.components.generic.ui_rect_component")
 
 function menu_widget:new(menu, owner)
