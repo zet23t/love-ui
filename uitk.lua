@@ -25,6 +25,7 @@ function uitk:new()
 		was_mouse_dragged = false,
 		was_mouse_released = false,
 		queued_updates = {},
+		frame_counter = 0,
 	}
 	self.context_mt = { __index = self.context, __newindex = self.context }
 	return self
@@ -50,6 +51,7 @@ end
 
 function uitk:draw(root)
 	self:load_context()
+	uitk_vars.frame_counter = uitk_vars.frame_counter + 1
 	local x, y = uitk:get_mouse()
 	root:recursive_trigger("layout_update_size")
 		:recursive_trigger("layout_update")
