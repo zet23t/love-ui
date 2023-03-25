@@ -102,6 +102,7 @@ function text_component:set_fitting_width(enabled, wrapping_width)
 	self.is_fitting_width = enabled
 	self.wrapping_width = wrapping_width or 1000
 	self.layout_update_size = (self.is_fitting_height or self.is_fitting_width) and layout_update_size
+	return self
 end
 
 
