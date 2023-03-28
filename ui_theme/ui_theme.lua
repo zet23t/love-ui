@@ -136,6 +136,10 @@ function ui_theme:panel_skin()
 	return sprite9_component:new(0, 48, 16, 32, 18, 6, 6, 6)
 end
 
+function ui_theme:rounded_panel_skin()
+	return sprite9_component:new(16, 64, 16, 16, 6, 6, 6, 6)
+end
+
 function ui_theme:decorate_panel_skin(ui_rect, caption)
 	ui_rect:add_component(self:panel_skin())
 	if caption then
