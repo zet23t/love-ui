@@ -93,9 +93,14 @@ function menu_widget:show(change)
 	return self.show_count > 0 and self
 end
 
+function menu_widget:set_menu_source_rect(rect)
+	self.menu_source_rect = rect
+	return self
+end
+
 function menu_widget:update(ui_rect)
 	self.timeout = self.timeout - 1
-	if self.timeout < 0 then
+	if self.timeout < 0 and (not self.menu_source_rect or not self.menu_source_rect:is_mouse_over()) then
 		ui_rect:remove()
 	end
 end
