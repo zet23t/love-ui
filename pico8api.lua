@@ -83,6 +83,7 @@ end
 function pico8api:rect(x, y, x2, y2, color, alpha_override)
 	local r, g, b, a = unpack(self.colors[color])
 	with_color(function()
+		love.graphics.setLineWidth(1)
 		love.graphics.rectangle("line", x, y, x2 - x, y2 - y)
 	end, r, g, b, alpha_override or a)
 end
