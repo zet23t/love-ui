@@ -34,6 +34,8 @@ return function(options)
 		call("textinput", char)
 	end
 
+	---@param key love.KeyConstant
+	---@return boolean
 	function love.keyboard.wasPressed(key)
 		return love.keyboard.keysPressed[key]
 	end
@@ -64,6 +66,12 @@ return function(options)
 			
 			local ui_scale = screen_x / target_x
 			ui_scale = math.max(1, math.floor(ui_scale - .3))
+			love.graphics.scale(ui_scale, ui_scale)
+			local w = math.floor(screen_x / ui_scale)
+			local h = math.floor(screen_y / ui_scale)
+			root_rect:set_rect(0, 0, w, h)
+		elseif options.target_scale then
+			local ui_scale = options.target_scale
 			love.graphics.scale(ui_scale, ui_scale)
 			local w = math.floor(screen_x / ui_scale)
 			local h = math.floor(screen_y / ui_scale)
