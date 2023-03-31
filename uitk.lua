@@ -101,6 +101,23 @@ function uitk:update(root)
 	call_all
 	"mouse_exit" "mouse_enter"
 	"is_mouse_over"
+	
+	if uitk_vars.was_mouse_pressed and #hits > 0 then
+		uitk_vars.dragged_element = hits[1]
+		local mx,my = uitk_vars.dragged_element:to_local(x,y)
+		uitk_vars.dragged_element:trigger_on_components("has_drag_started", uitk_vars.dragged_element, mx, my, b)
+	end
+	if uitk_vars.dragged_element then
+		local mx,my = uitk_vars.dragged_element:to_local(x,y)
+		uitk_vars.dragged_element:trigger_on_components("is_dragged", uitk_vars.dragged_element, mx, my, b)
+		if uitk_vars.was_mouse_released and uitk_vars.dragged_element then
+			uitk_vars.dragged_element:trigger_on_components("has_drag_ended", uitk_vars.dragged_element, mx, my, b)
+			uitk_vars.was_mouse_released = nil
+		end
+	end
+	
+
+	call_all
 	"was_released" "was_pressed_down" "was_triggered"
 	"is_pressed_down"
 	"update"

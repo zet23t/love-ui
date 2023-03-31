@@ -56,8 +56,15 @@ end
 ---@field flags table
 local ui_rect = require "love-util.class" "ui_rect"
 
+ui_rect.is_blocking_mouse = true
+
+function ui_rect:set_is_blocking_mouse(blocking)
+	self.is_blocking_mouse = blocking
+	return self
+end
+
 function ui_rect:collect_hits(x, y, list)
-	if self.disabled then
+	if self.disabled or not self.is_blocking_mouse then
 		return false
 	end
 
@@ -122,6 +129,10 @@ function ui_rect:update_flags(mx, my, hits)
 		end
 	end
 	trigger(self.components, "pre_draw", self)(self.children, "update_flags", mx, my, hits)(self.components, "post_draw")
+end
+
+function ui_rect:is_top_hit()
+	return self.flags.is_top_hit
 end
 
 function ui_rect:recursive_trigger(name, ...)
@@ -214,6 +225,10 @@ function ui_rect:update(mx, my)
 
 	trigger_queued(self.components, "update", self, mx, my)
 	trigger(self.children, "update", mx, my)
+end
+
+function ui_rect:is_mouse_over()
+	return self.flags.is_mouse_over
 end
 
 function ui_rect:draw()
@@ -346,6 +361,7 @@ end
 
 function ui_rect:set_enabled(is_enabled)
 	self.disabled = not is_enabled
+	return self
 end
 
 ---@param x number|nil
