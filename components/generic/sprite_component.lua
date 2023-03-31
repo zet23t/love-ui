@@ -22,6 +22,12 @@ function sprite_component:new(sprite_id, x, y, u, v, w, h, sheet)
 	}
 end
 
+function sprite_component:set_sprite_position(x,y)
+	self.x = x or self.x
+	self.y = y or self.y
+	return self
+end
+
 function sprite_component:draw(ui_rect)
 	local x, y = ui_rect:to_world(self.x, self.y)
 	pico8api:spr(self.sprite_id, x, y, self.u, self.v, self.w, self.h, self.sheet)
