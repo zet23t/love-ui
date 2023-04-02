@@ -1,4 +1,5 @@
 local pico8api = require "love-ui.pico8api"
+local pico8_colors = require "lib.love-ui.pico8_colors"
 
 ---@class text_component : ui_rect_component
 ---@field text string
@@ -14,6 +15,7 @@ text_component.line_height = 12
 text_component.line_spacing = 4
 text_component.newline_indent = 0
 text_component.firstline_indent = 0
+text_component.scale = 1
 
 function text_component:new(text, color, t, r, b, l, align_x, align_y)
 	return text_component:create {
@@ -47,11 +49,11 @@ local function get_wrapped_text(self, text, max_width)
 		local line = ""
 		local line_width = self.firstline_indent
 		for fragment, word in text_line:gmatch "(%s*(%S+))" do
-			local width = pico8api:text_width(fragment)
+			local width = self:get_width(fragment)
 			if (line_width + width > max_width) and (line_width > 0) then
 				lines[#lines + 1] = { line, line_width }
 				line = word
-				line_width = pico8api:text_width(line) + self.newline_indent
+				line_width = self:get_width(line) + self.newline_indent
 			else
 				line_width = line_width + width
 				line = line .. fragment
@@ -85,7 +87,7 @@ local function layout_update_size(self, rect)
 
 	local maxpos_x = rect.w - self.r - self.l
 	lines = lines or get_wrapped_text(self, self.text, maxpos_x)
-	rect.h = self.line_height * #lines + self.line_spacing * (#lines - 1) + self.b + self.t
+	rect.h = (self.line_height * #lines + self.line_spacing * (#lines - 1)) * self.scale + self.b + self.t
 
 	self.cached_text = self.text
 	self.cached_w = rect.w
@@ -105,6 +107,14 @@ function text_component:set_fitting_width(enabled, wrapping_width)
 	return self
 end
 
+---@param font love.Font
+function text_component:set_font(font)
+	self.font = font
+	if font then
+		self.line_height = font:getHeight()
+	end
+	return self
+end
 
 function text_component:set_rotation(rotation)
 	self.rotation = rotation or self.rotation
@@ -121,13 +131,28 @@ local function rotate(rotation, x0, y0, x, y, ...)
 	return x0 + dx, y0 + dy
 end
 
+function text_component:set_scale(scale)
+	self.scale = scale
+	return self
+end
+
+function text_component:get_width(text)
+	return (self.font and self.font:getWidth(text) or pico8api:text_width(text)) * self.scale
+end
+
 function text_component:draw(ui_rect)
 	local t, r, b, l = self.t, self.r, self.b, self.l
 	local x0, y0 = ui_rect:to_world()
-	local w = pico8api:text_width(self.text)
-	local h = self.line_height
+	local w = self:get_width(self.text)
+	local h = self.line_height * self.scale
 	local maxpos_x = ui_rect.w - r - l
 	local maxpos_y = ui_rect.h - t - b
+	local scale = self.scale
+	
+	if self.font then
+		love.graphics.setFont(self.font)
+		love.graphics.setColor(unpack(pico8_colors[self.color]))
+	end
 
 	local function print_line(text, w, xoff, yoff)
 		local x = x0 + l + self.align_x * maxpos_x - w * self.align_x
@@ -146,14 +171,18 @@ function text_component:draw(ui_rect)
 
 		end
 		-- pico8api:rect(min_x, min_y, max_x, max_y, 1)
-		pico8api:print(text, x + xoff, y + yoff, self.color, min_x, min_y, max_x, max_y, self.rotation)
+		if self.font then
+			love.graphics.print(text, x + xoff, y + yoff, self.rotation, scale, scale, 0, 0)
+		else
+			pico8api:print(text, x + xoff, y + yoff, self.color, min_x, min_y, max_x, max_y, self.rotation)
+		end
 	end
 
 	if w > maxpos_x and self.is_multiline_enabled then
 		local lines = get_wrapped_text(self, self.text, maxpos_x)
 
-		local line_offset = self.line_height + self.line_spacing
-		h = self.line_height * #lines + self.line_spacing * (#lines - 1)
+		local line_offset = (self.line_height + self.line_spacing) * scale
+		h = self.line_height * #lines * scale + self.line_spacing * (#lines - 1) * scale
 		for i,line in ipairs(lines) do 
 			local indent = i > 1 and self.newline_indent or self.firstline_indent
 			print_line(line[1], line[2], indent, (i - 1) * line_offset)
@@ -161,6 +190,11 @@ function text_component:draw(ui_rect)
 		-- print(self.text)
 	else
 		print_line(self.text, w, self.firstline_indent, 0)
+	end
+	
+	if self.font then
+		love.graphics.setColor(1,1,1,1)
+
 	end
 end
 
