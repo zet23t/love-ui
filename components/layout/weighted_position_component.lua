@@ -26,6 +26,12 @@ function weighted_position_component:new(wx, wy, padding_top, padding_right, pad
 	}
 end
 
+function weighted_position_component:set_weight(wx,wy)
+	self.wx = wx or self.wx
+	self.wy = wy or self.wy
+	return self
+end
+
 function weighted_position_component:set_alignto_rect(rect)
 	self.alignto_rect = rect
 	return self
