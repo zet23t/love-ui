@@ -63,7 +63,7 @@ function linear_layouter_component:layout_update_size(rect)
 		rect[minor_key] = max_minor_val
 	end
 end
-
+local default_alignment = {x = 0.5, y = 0.5}
 ---@param rect ui_rect
 function linear_layouter_component:layout_update(rect)
 	local pos = self.l
@@ -79,7 +79,9 @@ function linear_layouter_component:layout_update(rect)
 
 	for i = 1, #rect.children do
 		local child = rect.children[i]
-		child[major_pos] = math.floor((rect[minor_size] - major_b - major_a - child[minor_size]) / 2 + major_a)
+		local align = (child.layout_alignment or default_alignment)[major_pos] or default_alignment[major_pos]
+		
+		child[major_pos] = math.floor((rect[minor_size] - major_b - major_a - child[minor_size]) * align + major_a)
 		child[minor_pos] = pos
 		pos = pos + child[major_size] + self.spacing
 	end
