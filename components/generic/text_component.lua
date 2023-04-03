@@ -42,6 +42,19 @@ function text_component:set_multiline(enabled)
 	return self
 end
 
+function text_component:set_line_height(line_height)
+	self.line_height = line_height
+	return self
+end
+
+function text_component:set_line_spacing(line_spacing)
+	self.line_spacing = line_spacing
+	if self.font and line_spacing ~=0 then
+		print "warning: line spacing + font is not implemented"
+	end
+	return self
+end
+
 local function get_wrapped_text(self, text, max_width)
 	local lines = {}
 	
@@ -84,11 +97,10 @@ local function layout_update_size(self, rect)
 	if self.cached_text == self.text and self.cached_w == rect.w and self.cached_h == rect.h then
 		return
 	end
-
+	
 	local maxpos_x = rect.w - self.r - self.l
 	lines = lines or get_wrapped_text(self, self.text, maxpos_x)
 	rect.h = (self.line_height * #lines + self.line_spacing * (#lines - 1)) * self.scale + self.b + self.t
-
 	self.cached_text = self.text
 	self.cached_w = rect.w
 	self.cached_h = rect.h
@@ -112,6 +124,7 @@ function text_component:set_font(font)
 	self.font = font
 	if font then
 		self.line_height = font:getHeight()
+		self.line_spacing = 0
 	end
 	return self
 end
@@ -144,7 +157,7 @@ function text_component:draw(ui_rect)
 	local t, r, b, l = self.t, self.r, self.b, self.l
 	local x0, y0 = ui_rect:to_world()
 	local w = self:get_width(self.text)
-	local h = self.line_height * self.scale
+	local h = ui_rect.h -- self.line_height * self.scale
 	local maxpos_x = ui_rect.w - r - l
 	local maxpos_y = ui_rect.h - t - b
 	local scale = self.scale
@@ -152,12 +165,13 @@ function text_component:draw(ui_rect)
 	if self.font then
 		love.graphics.setFont(self.font)
 		love.graphics.setColor(unpack(pico8_colors[self.color]))
+		-- love.graphics.rectangle("line",x0,y0,ui_rect.w, ui_rect.h)
 	end
 
 	local function print_line(text, w, xoff, yoff)
 		local x = x0 + l + self.align_x * maxpos_x - w * self.align_x
 		local y = y0 + t + self.align_y * maxpos_y - h * self.align_y + 1
-
+		
 		local min_x, min_y, max_x, max_y = x0 + l,
 			y0 + t,
 			x0 + ui_rect.w - r, y0 + ui_rect.h - b
@@ -180,14 +194,12 @@ function text_component:draw(ui_rect)
 
 	if w > maxpos_x and self.is_multiline_enabled then
 		local lines = get_wrapped_text(self, self.text, maxpos_x)
-
 		local line_offset = (self.line_height + self.line_spacing) * scale
 		h = self.line_height * #lines * scale + self.line_spacing * (#lines - 1) * scale
 		for i,line in ipairs(lines) do 
 			local indent = i > 1 and self.newline_indent or self.firstline_indent
 			print_line(line[1], line[2], indent, (i - 1) * line_offset)
 		end
-		-- print(self.text)
 	else
 		print_line(self.text, w, self.firstline_indent, 0)
 	end
