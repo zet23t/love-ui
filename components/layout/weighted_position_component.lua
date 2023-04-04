@@ -7,6 +7,8 @@
 ---@field padding_bottom number padding distance from bottom
 ---@field padding_left number padding distance from left
 local weighted_position_component = require "love-util.class" "weighted_position_component":extends(require "love-ui.components.generic.ui_rect_component")
+weighted_position_component.offset_x = 0
+weighted_position_component.offset_y = 0
 
 ---@param wx number|nil defaults to 0.5
 ---@param wy number|nil defaults to 0.5
@@ -37,6 +39,12 @@ function weighted_position_component:set_alignto_rect(rect)
 	return self
 end
 
+function weighted_position_component:set_offset(x,y)
+	self.offset_x = x
+	self.offset_y = y
+	return self
+end
+
 function weighted_position_component:layout_update(ui_rect)
 	local alignto = self.alignto_rect or ui_rect.parent
 	if not alignto then return end
@@ -46,7 +54,7 @@ function weighted_position_component:layout_update(ui_rect)
 	local dw, dh = pw - w, ph - h
 	local awx, awy = alignto:to_world(0, 0)
 	local lx, ly = ui_rect.parent:to_local(awx, awy)
-	ui_rect.x, ui_rect.y = math.floor(dw * self.wx + self.padding_left + .5) - lx, math.floor(dh * self.wy + self.padding_top + .5) - ly
+	ui_rect.x, ui_rect.y = math.floor(dw * self.wx + self.padding_left + .5 + self.offset_x) - lx, math.floor(dh * self.wy + self.padding_top + .5 + self.offset_y) - ly
 end
 
 return weighted_position_component
