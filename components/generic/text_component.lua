@@ -6,6 +6,7 @@ local pico8_colors = require "lib.love-ui.pico8_colors"
 ---@field color integer
 ---@field align_x number
 ---@field align_y number
+---@field font love.Font
 ---@field t number
 ---@field r number
 ---@field b number
@@ -57,7 +58,6 @@ end
 
 local function get_wrapped_text(self, text, max_width)
 	local lines = {}
-	
 	for text_line,line_break in text:gmatch "([^\n]*)\n?" do
 		local line = ""
 		local line_width = self.firstline_indent
@@ -79,6 +79,7 @@ local function get_wrapped_text(self, text, max_width)
 	return lines
 end
 
+---@param self text_component
 local function layout_update_size(self, rect)
 	local lines
 	if self.is_fitting_width then
@@ -101,6 +102,9 @@ local function layout_update_size(self, rect)
 	local maxpos_x = rect.w - self.r - self.l
 	lines = lines or get_wrapped_text(self, self.text, maxpos_x)
 	rect.h = (self.line_height * #lines + self.line_spacing * (#lines - 1)) * self.scale + self.b + self.t
+	if self.font then
+		rect.h = rect.h - (self.font:getHeight() - self.font:getBaseline()) * self.scale
+	end
 	self.cached_text = self.text
 	self.cached_w = rect.w
 	self.cached_h = rect.h
