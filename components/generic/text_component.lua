@@ -50,7 +50,7 @@ end
 
 function text_component:set_line_spacing(line_spacing)
 	self.line_spacing = line_spacing
-	if self.font and line_spacing ~=0 then
+	if self.font and line_spacing ~= 0 then
 		print "warning: line spacing + font is not implemented"
 	end
 	return self
@@ -58,22 +58,24 @@ end
 
 local function get_wrapped_text(self, text, max_width)
 	local lines = {}
-	for text_line,line_break in text:gmatch "([^\n]*)\n?" do
+	for text_line_start, text_line, line_break in text:gmatch "()([^\n]*)\n?" do
 		local line = ""
 		local line_width = self.firstline_indent
-		for fragment, word in text_line:gmatch "(%s*(%S+))" do
+		local start_pos = text_line_start - 1
+		for fragment_start, fragment, word in text_line:gmatch "()(%s*(%S+))" do
 			local width = self:get_width(fragment)
 			if (line_width + width > max_width) and (line_width > 0) then
-				lines[#lines + 1] = { line, line_width }
+				lines[#lines + 1] = { line, line_width, start_pos }
 				line = word
 				line_width = self:get_width(line) + self.newline_indent
+				start_pos = start_pos + fragment_start - 1
 			else
 				line_width = line_width + width
 				line = line .. fragment
 			end
 		end
 		if #line > 0 then
-			lines[#lines + 1] = { line, line_width }
+			lines[#lines + 1] = { line, line_width, start_pos }
 		end
 	end
 	return lines
@@ -85,20 +87,20 @@ local function layout_update_size(self, rect)
 	if self.is_fitting_width then
 		lines = get_wrapped_text(self, self.text, self.wrapping_width)
 		local max_width = 0
-		for i=1,#lines do
+		for i = 1, #lines do
 			max_width = math.max(max_width, lines[i][2])
 		end
 		rect.w = max_width + self.r + self.l
 	end
-	
-	if not self.is_fitting_height then 
-		return 
+
+	if not self.is_fitting_height then
+		return
 	end
-	
+
 	if self.cached_text == self.text and self.cached_w == rect.w and self.cached_h == rect.h then
 		return
 	end
-	
+
 	local maxpos_x = rect.w - self.r - self.l
 	lines = lines or get_wrapped_text(self, self.text, maxpos_x)
 	rect.h = (self.line_height * #lines + self.line_spacing * (#lines - 1)) * self.scale + self.b + self.t
@@ -108,6 +110,11 @@ local function layout_update_size(self, rect)
 	self.cached_text = self.text
 	self.cached_w = rect.w
 	self.cached_h = rect.h
+end
+
+function text_component:set_formatting_table(tab)
+	self.formatting = tab
+	return self
 end
 
 function text_component:set_fitting_height(enabled)
@@ -165,17 +172,47 @@ function text_component:draw(ui_rect)
 	local maxpos_x = ui_rect.w - r - l
 	local maxpos_y = ui_rect.h - t - b
 	local scale = self.scale
-	
+
 	if self.font then
 		love.graphics.setFont(self.font)
 		love.graphics.setColor(unpack(pico8_colors[self.color]))
 		-- love.graphics.rectangle("line",x0,y0,ui_rect.w, ui_rect.h)
 	end
 
-	local function print_line(text, w, xoff, yoff)
+	local cursive = 0
+	local function print_with_formatting(text, x, y, rotation, scale, start_pos, formatting)
+		local p = 1
+		for i = 1, #formatting do
+			local fmt = formatting[i]
+			local to = fmt.pos - start_pos
+			if to > #text then
+				break
+			end
+			local part = text:sub(p, to)
+			p = to + 1
+			-- start_pos = fmt.pos
+			lim_log(i,#formatting,"'" .. part .. "'", fmt.pos, start_pos)
+			love.graphics.print(part, x, y, rotation, scale, scale, 0, 0, cursive, 0)
+			if fmt.attribute == "cursive" then
+				cursive = fmt.value and -0.25 or 0
+				if fmt.value then
+					x = x + self:get_width(" ")
+				else
+					x = x - self:get_width " "
+				end
+			end
+			x = x + self:get_width(part)
+		end
+
+		if p <= #text then
+			love.graphics.print(text:sub(p), x, y, rotation, scale, scale, 0, 0, 0, 0)
+		end
+	end
+
+	local function print_line(text, w, xoff, yoff, start_pos)
 		local x = x0 + l + self.align_x * maxpos_x - w * self.align_x
 		local y = y0 + t + self.align_y * maxpos_y - h * self.align_y + 1
-		
+
 		local min_x, min_y, max_x, max_y = x0 + l,
 			y0 + t,
 			x0 + ui_rect.w - r, y0 + ui_rect.h - b
@@ -186,11 +223,14 @@ function text_component:draw(ui_rect)
 			x, y, min_x, min_y, max_x, max_y = rotate(self.rotation, x0, y0, x, y, min_x, min_y, max_x, max_y)
 			-- min_x, min_y = rotate(self.rotation, x,y,x0,y0)
 			-- pico8api:rect(x,y,max_x, max_y, 1)
-
 		end
 		-- pico8api:rect(min_x, min_y, max_x, max_y, 1)
 		if self.font then
-			love.graphics.print(text, x + xoff, y + yoff, self.rotation, scale, scale, 0, 0)
+			if self.formatting and #self.formatting > 0 then
+				print_with_formatting(text, x + xoff, y + yoff, self.rotation, scale, start_pos, self.formatting)
+			else
+				love.graphics.print(text, x + xoff, y + yoff, self.rotation, scale, scale, 0, 0, 0, 0)
+			end
 		else
 			pico8api:print(text, x + xoff, y + yoff, self.color, min_x, min_y, max_x, max_y, self.rotation)
 		end
@@ -200,17 +240,16 @@ function text_component:draw(ui_rect)
 		local lines = get_wrapped_text(self, self.text, maxpos_x)
 		local line_offset = (self.line_height + self.line_spacing) * scale
 		h = self.line_height * #lines * scale + self.line_spacing * (#lines - 1) * scale
-		for i,line in ipairs(lines) do 
+		for i, line in ipairs(lines) do
 			local indent = i > 1 and self.newline_indent or self.firstline_indent
-			print_line(line[1], line[2], indent, (i - 1) * line_offset)
+			print_line(line[1], line[2], indent, (i - 1) * line_offset, line[3])
 		end
 	else
-		print_line(self.text, w, self.firstline_indent, 0)
+		print_line(self.text, w, self.firstline_indent, 0, 0)
 	end
-	
-	if self.font then
-		love.graphics.setColor(1,1,1,1)
 
+	if self.font then
+		love.graphics.setColor(1, 1, 1, 1)
 	end
 end
 
