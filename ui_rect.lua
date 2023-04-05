@@ -290,6 +290,11 @@ function ui_rect:add_component(cmp, ...)
 	end
 end
 
+function ui_rect:insert_component(index, cmp)
+	table.insert(self.components, index, cmp)
+	return cmp
+end
+
 function ui_rect:get_component_by_id(id)
 	for i = 1, #self.components do
 		if self.components[i].id == id then
