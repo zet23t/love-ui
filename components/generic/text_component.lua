@@ -68,7 +68,7 @@ local function get_wrapped_text(self, text, max_width)
 				lines[#lines + 1] = { line, line_width, start_pos }
 				line = word
 				line_width = self:get_width(line) + self.newline_indent
-				start_pos = start_pos + fragment_start - 1
+				start_pos = start_pos + fragment_start
 			else
 				line_width = line_width + width
 				line = line .. fragment
@@ -188,24 +188,26 @@ function text_component:draw(ui_rect)
 			if to > #text then
 				break
 			end
-			local part = text:sub(p, to)
-			p = to + 1
-			-- start_pos = fmt.pos
-			lim_log(i,#formatting,"'" .. part .. "'", fmt.pos, start_pos)
-			love.graphics.print(part, x, y, rotation, scale, scale, 0, 0, cursive, 0)
-			if fmt.attribute == "cursive" then
-				cursive = fmt.value and -0.25 or 0
-				if fmt.value then
-					x = x + self:get_width(" ")
-				else
-					x = x - self:get_width " "
+			if to > 1 then
+				local part = text:sub(p, to)
+				p = to + 1
+				-- start_pos = fmt.pos
+				-- lim_log(i,#formatting,"'" .. part .. "'", fmt.pos, start_pos)
+				love.graphics.print(part, x, y, rotation, scale, scale, 0, 0, cursive, 0)
+				if fmt.attribute == "cursive" then
+					cursive = fmt.value and -0.25 or 0
+					if fmt.value then
+						x = x + self:get_width(" ")
+					else
+						x = x - self:get_width " "
+					end
 				end
+				x = x + self:get_width(part)
 			end
-			x = x + self:get_width(part)
 		end
 
 		if p <= #text then
-			love.graphics.print(text:sub(p), x, y, rotation, scale, scale, 0, 0, 0, 0)
+			love.graphics.print(text:sub(p), x, y, rotation, scale, scale, 0, 0, cursive, 0)
 		end
 	end
 
