@@ -364,6 +364,8 @@ function ui_rect:new_with_proxy_components(x, y, w, h, parent, ...)
 	return self
 end
 
+function ui_rect:is_enabled() return not self.disabled end
+
 function ui_rect:set_enabled(is_enabled)
 	self.disabled = not is_enabled
 	return self
