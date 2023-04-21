@@ -63,25 +63,30 @@ function linear_layouter_component:layout_update_size(rect)
 		rect[minor_key] = max_minor_val
 	end
 end
-local default_alignment = {x = 0.5, y = 0.5}
+local default_alignment = {x = 0.5, y = 0.5, padding_left = 0, padding_right = 0, padding_top = 0, padding_bottom = 0}
 ---@param rect ui_rect
 function linear_layouter_component:layout_update(rect)
 	local pos = self.l
 	local major_a, major_b = self.t, self.b
 	local major_pos, minor_pos = "y", "x"
 	local major_size, minor_size = "w", "h"
+	local major_padding_0, major_padding_1 = "padding_top", "padding_bottom"
 	if self.axis == 2 then
 		pos = self.t
 		major_a, major_b = self.l, self.r
 		major_pos, minor_pos = "x", "y"
 		major_size, minor_size = "h", "w"
+		major_padding_0, major_padding_1 = "padding_left", "padding_right"
 	end
 
 	for i = 1, #rect.children do
 		local child = rect.children[i]
-		local align = (child.layout_alignment or default_alignment)[major_pos] or default_alignment[major_pos]
+		local layout_alignment = (child.layout_alignment or default_alignment)
+		local align = layout_alignment[major_pos] or default_alignment[major_pos]
+		local padding_0, padding_1 = layout_alignment[major_padding_0] or 0, layout_alignment[major_padding_1] or 0
+		-- print(major_padding_0, padding_0, major_padding_1, padding_1,align)
 		
-		child[major_pos] = math.floor((rect[minor_size] - major_b - major_a - child[minor_size]) * align + major_a)
+		child[major_pos] = math.floor((rect[minor_size] - major_b - major_a - child[minor_size] - padding_0 - padding_1) * align + major_a + padding_0)
 		child[minor_pos] = pos
 		pos = pos + child[major_size] + self.spacing
 	end
