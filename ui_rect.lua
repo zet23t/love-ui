@@ -368,6 +368,7 @@ function ui_rect:is_enabled() return not self.disabled end
 
 function ui_rect:set_enabled(is_enabled)
 	self.disabled = not is_enabled
+	self:trigger_on_components_and_children("on_set_enabled", is_enabled)
 	return self
 end
 

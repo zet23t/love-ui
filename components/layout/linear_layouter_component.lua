@@ -81,14 +81,16 @@ function linear_layouter_component:layout_update(rect)
 
 	for i = 1, #rect.children do
 		local child = rect.children[i]
-		local layout_alignment = (child.layout_alignment or default_alignment)
-		local align = layout_alignment[major_pos] or default_alignment[major_pos]
-		local padding_0, padding_1 = layout_alignment[major_padding_0] or 0, layout_alignment[major_padding_1] or 0
-		-- print(major_padding_0, padding_0, major_padding_1, padding_1,align)
-		
-		child[major_pos] = math.floor((rect[minor_size] - major_b - major_a - child[minor_size] - padding_0 - padding_1) * align + major_a + padding_0)
-		child[minor_pos] = pos
-		pos = pos + child[major_size] + self.spacing
+		if child:is_enabled() then
+			local layout_alignment = (child.layout_alignment or default_alignment)
+			local align = layout_alignment[major_pos] or default_alignment[major_pos]
+			local padding_0, padding_1 = layout_alignment[major_padding_0] or 0, layout_alignment[major_padding_1] or 0
+			-- print(major_padding_0, padding_0, major_padding_1, padding_1,align)
+			
+			child[major_pos] = math.floor((rect[minor_size] - major_b - major_a - child[minor_size] - padding_0 - padding_1) * align + major_a + padding_0)
+			child[minor_pos] = pos
+			pos = pos + child[major_size] + self.spacing
+		end
 	end
 end
 

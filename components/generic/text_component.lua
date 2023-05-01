@@ -1,3 +1,4 @@
+local utf8 = require "utf8"
 local pico8api = require "love-ui.pico8api"
 local pico8_colors = require "lib.love-ui.pico8_colors"
 
@@ -17,6 +18,7 @@ text_component.line_spacing = 4
 text_component.newline_indent = 0
 text_component.firstline_indent = 0
 text_component.scale = 1
+text_component.animation_speed = false
 
 function text_component:new(text, color, t, r, b, l, align_x, align_y)
 	return text_component:create {
@@ -24,8 +26,13 @@ function text_component:new(text, color, t, r, b, l, align_x, align_y)
 		l = l or 0, r = r or 0, t = t or 0, b = b or 0,
 		align_x = align_x or 0.5,
 		align_y = align_y or 0.5,
-		rotation = 0
+		rotation = 0,
+		activation_time = love.timer.getTime(),
 	}
+end
+
+function text_component:on_set_enabled(status)
+	self.activation_time = love.timer.getTime()
 end
 
 function text_component:set_newline_indent(x)
@@ -164,6 +171,59 @@ function text_component:get_width(text)
 	return (self.font and self.font:getWidth(text) or pico8api:text_width(text)) * self.scale
 end
 
+function text_component:print_text(from, part, x, y, rotation, scale, cursive)
+	local y_scale = scale
+	if self.animation_speed then
+		local delta = love.timer.getTime() - self.activation_time
+		local next_n = 5
+		local pos = delta / self.animation_speed - from - next_n
+		if pos < -next_n then
+			return
+		end
+		if pos < utf8.len(part) then
+			local cut
+			repeat
+				cut = part:sub(1, math.max(0, math.ceil(pos)))
+				pos = pos + 1
+			until utf8.len(cut)
+			local next_letter
+			local spos = #cut + 1
+			local xoff = 0
+			local w = self:get_width(cut)
+
+			local fract = pos - math.floor(pos)
+			local r,g,b,a = love.graphics.getColor()
+			for i = 0, next_n - 1 do
+				local vscale = 1 - (i - fract + 1) / next_n
+				love.graphics.setColor(r,g,b,a * vscale)
+				vscale = (math.sin(vscale * math.pi*.8) / math.sin(math.pi*.8))^.5
+				repeat
+					next_letter = part:sub(spos, math.max(0,math.ceil(pos)))
+					pos = pos + 1
+				until utf8.len(next_letter)
+				spos = spos + #next_letter
+				if #next_letter > 0 then
+					local offset = self.line_height
+					love.graphics.print(next_letter, x + w, y + offset * 0.25, rotation, scale, scale * vscale, 0,
+						offset * .5, cursive, 0)
+					w = w + self:get_width(next_letter)
+				end
+			end
+			love.graphics.setColor(r,g,b,a)
+			part = cut
+			--y_scale = fract * y_scale
+		end
+	end
+	if #part > 0 then
+		love.graphics.print(part, x, y, rotation, scale, scale, 0, 0, cursive, 0)
+	end
+end
+
+function text_component:set_animation_speed(speed)
+	self.animation_speed = speed
+	return self
+end
+
 function text_component:draw(ui_rect)
 	local t, r, b, l = self.t, self.r, self.b, self.l
 	local x0, y0 = ui_rect:to_world()
@@ -180,7 +240,7 @@ function text_component:draw(ui_rect)
 	end
 
 	local cursive = 0
-	local function print_with_formatting(text, x, y, rotation, scale, start_pos, formatting)
+	local function print_with_formatting(text_pos, text, x, y, rotation, scale, start_pos, formatting)
 		local p = 1
 		for i = 1, #formatting do
 			local fmt = formatting[i]
@@ -193,7 +253,7 @@ function text_component:draw(ui_rect)
 				p = to + 1
 				-- start_pos = fmt.pos
 				-- lim_log(i,#formatting,"'" .. part .. "'", fmt.pos, start_pos)
-				love.graphics.print(part, x, y, rotation, scale, scale, 0, 0, cursive, 0)
+				self:print_text(text_pos, part, x, y, rotation, scale, cursive)
 				if fmt.attribute == "cursive" then
 					cursive = fmt.value and -0.25 or 0
 					if fmt.value then
@@ -207,11 +267,11 @@ function text_component:draw(ui_rect)
 		end
 
 		if p <= #text then
-			love.graphics.print(text:sub(p), x, y, rotation, scale, scale, 0, 0, cursive, 0)
+			self:print_text(text_pos, text:sub(p), x, y, rotation, scale, cursive)
 		end
 	end
 
-	local function print_line(text, w, xoff, yoff, start_pos)
+	local function print_line(tstart, text, w, xoff, yoff, start_pos)
 		local x = x0 + l + self.align_x * maxpos_x - w * self.align_x
 		local y = y0 + t + self.align_y * maxpos_y - h * self.align_y + 1
 
@@ -229,9 +289,9 @@ function text_component:draw(ui_rect)
 		-- pico8api:rect(min_x, min_y, max_x, max_y, 1)
 		if self.font then
 			if self.formatting and #self.formatting > 0 then
-				print_with_formatting(text, x + xoff, y + yoff, self.rotation, scale, start_pos, self.formatting)
+				print_with_formatting(tstart, text, x + xoff, y + yoff, self.rotation, scale, start_pos, self.formatting)
 			else
-				love.graphics.print(text, x + xoff, y + yoff, self.rotation, scale, scale, 0, 0, 0, 0)
+				self:print_text(tstart, text, x + xoff, y + yoff, self.rotation, scale, 0)
 			end
 		else
 			pico8api:print(text, x + xoff, y + yoff, self.color, min_x, min_y, max_x, max_y, self.rotation)
@@ -242,12 +302,14 @@ function text_component:draw(ui_rect)
 		local lines = get_wrapped_text(self, self.text, maxpos_x)
 		local line_offset = (self.line_height + self.line_spacing) * scale
 		h = self.line_height * #lines * scale + self.line_spacing * (#lines - 1) * scale
+		local pos = 1
 		for i, line in ipairs(lines) do
 			local indent = i > 1 and self.newline_indent or self.firstline_indent
-			print_line(line[1], line[2], indent, (i - 1) * line_offset, line[3])
+			print_line(pos, line[1], line[2], indent, (i - 1) * line_offset, line[3])
+			pos = pos + #line[1]
 		end
 	else
-		print_line(self.text, w, self.firstline_indent, 0, 0)
+		print_line(1, self.text, w, self.firstline_indent, 0, 0)
 	end
 
 	if self.font then
