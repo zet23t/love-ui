@@ -47,7 +47,7 @@ function linear_layouter_component:layout_update_size(rect)
 
 	for i = 1, #rect.children do
 		local child = rect.children[i]
-		if not child.ignore_layouting then
+		if not child.ignore_layouting and child:is_enabled() then
 			if self.minor_axis_expand_children_enabled then
 				child[minor_key] = rect[minor_key] - minor_val
 			elseif self.minor_axis_fit_enabled then

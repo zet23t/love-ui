@@ -18,7 +18,7 @@ text_component.line_spacing = 4
 text_component.newline_indent = 0
 text_component.firstline_indent = 0
 text_component.scale = 1
-text_component.animation_speed = false
+text_component.animation_settings = false
 
 function text_component:new(text, color, t, r, b, l, align_x, align_y)
 	return text_component:create {
@@ -173,43 +173,88 @@ end
 
 function text_component:print_text(from, part, x, y, rotation, scale, cursive)
 	local y_scale = scale
-	if self.animation_speed then
+	if self.animation_settings and self.animation_settings.duration_per_character then
+		local animation_speed = self.animation_settings.duration_per_character
+		local next_n = self.animation_settings.animated_character_count or 6
+		local total_len = utf8.len(self.text)
 		local delta = love.timer.getTime() - self.activation_time
-		local next_n = 5
-		local pos = delta / self.animation_speed - from - next_n
+		local t = delta / animation_speed
+		local index = 1
+		-- local progress = math.min(1, t / (total_len + next_n - 1))
+		if self.animation_settings.text_time_transformation == "sin" then
+			-- t = (math.sin((progress - .5) * math.pi) * .5 + .5) * (total_len + next_n)
+		end
+		local letter_vertical_offset_factor = self.animation_settings.letter_vertical_offset_factor or 0.5
+
+		local pos = t - from - next_n
+		-- this is nasty: the position is a byte position, but our text may contain utf8 sequences
+		-- we have to iterate over the entire text and increase the current pos index for each
+		-- multibyte character so our pos index is linearly going over the unicode characters - while
+		-- it jumps over multibyte indices
+		while pos < #part and index <= pos and index <= #part do
+			if not utf8.len(part:sub(1,index)) then
+				pos = pos + 1
+			end
+			index = index + 1
+		end
+
 		if pos < -next_n then
 			return
 		end
+
 		if pos < utf8.len(part) then
+
 			local cut
 			repeat
 				cut = part:sub(1, math.max(0, math.ceil(pos)))
 				pos = pos + 1
 			until utf8.len(cut)
+			
 			local next_letter
 			local spos = #cut + 1
 			local xoff = 0
 			local w = self:get_width(cut)
 
+			local offset = self.font:getHeight() * letter_vertical_offset_factor
+
 			local fract = pos - math.floor(pos)
-			local r,g,b,a = love.graphics.getColor()
+			-- print(("%d %.3f progress=%.3f %s"):format(pos, fract, progress,cut))
+			local r, g, b, a = love.graphics.getColor()
+			local letter_animation_vertical_scaling = self.animation_settings.letter_animation_vertical_scaling
+			local letter_animation_alpha_blend = self.animation_settings.letter_animation_alpha_blend
+			local letter_horizontal_offset = self.animation_settings.letter_horizontal_offset
+			
 			for i = 0, next_n - 1 do
-				local vscale = 1 - (i - fract + 1) / next_n
-				love.graphics.setColor(r,g,b,a * vscale)
-				vscale = (math.sin(vscale * math.pi*.8) / math.sin(math.pi*.8))^.5
+				local character_animation_progress = 1 - (i - fract + 1) / next_n
+				local color_alpha_blend = character_animation_progress
+				if letter_animation_alpha_blend then 
+					color_alpha_blend = letter_animation_alpha_blend(color_alpha_blend)
+				end
+				love.graphics.setColor(r, g, b, a * color_alpha_blend)
+
+				local vertical_scaling = character_animation_progress
+				if letter_animation_vertical_scaling then
+					vertical_scaling = letter_animation_vertical_scaling(character_animation_progress)
+				end
+
+				local x_offset = 0
+				if letter_horizontal_offset then
+					x_offset = letter_horizontal_offset(character_animation_progress)
+				end
+
 				repeat
-					next_letter = part:sub(spos, math.max(0,math.ceil(pos)))
+					next_letter = part:sub(spos, math.max(0, math.ceil(pos)))
 					pos = pos + 1
 				until utf8.len(next_letter)
 				spos = spos + #next_letter
 				if #next_letter > 0 then
-					local offset = self.line_height
-					love.graphics.print(next_letter, x + w, y + offset * 0.25, rotation, scale, scale * vscale, 0,
-						offset * .5, cursive, 0)
+					love.graphics.print(next_letter, x + w + x_offset, y + offset * scale, rotation, scale, scale * vertical_scaling,
+						0,
+						offset, cursive, 0)
 					w = w + self:get_width(next_letter)
 				end
 			end
-			love.graphics.setColor(r,g,b,a)
+			love.graphics.setColor(r, g, b, a)
 			part = cut
 			--y_scale = fract * y_scale
 		end
@@ -219,8 +264,8 @@ function text_component:print_text(from, part, x, y, rotation, scale, cursive)
 	end
 end
 
-function text_component:set_animation_speed(speed)
-	self.animation_speed = speed
+function text_component:set_animation_settings(animation_settings)
+	self.animation_settings = animation_settings
 	return self
 end
 

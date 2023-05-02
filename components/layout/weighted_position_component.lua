@@ -34,6 +34,14 @@ function weighted_position_component:set_weight(wx,wy)
 	return self
 end
 
+function weighted_position_component:set_padding(top,right,bottom,left)
+	self.padding_top = top or 0;
+	self.padding_right = right or 0;
+	self.padding_bottom = bottom or 0;
+	self.padding_left = left or 0;
+	return self
+end
+
 function weighted_position_component:set_alignto_rect(rect)
 	self.alignto_rect = rect
 	return self
