@@ -18,6 +18,7 @@ text_component.line_spacing = 4
 text_component.newline_indent = 0
 text_component.firstline_indent = 0
 text_component.scale = 1
+text_component.alpha = 1
 text_component.animation_settings = false
 
 function text_component:new(text, color, t, r, b, l, align_x, align_y)
@@ -29,6 +30,11 @@ function text_component:new(text, color, t, r, b, l, align_x, align_y)
 		rotation = 0,
 		activation_time = love.timer.getTime(),
 	}
+end
+
+function text_component:set_alpha(alpha)
+	self.alpha = alpha or 1
+	return self
 end
 
 function text_component:on_set_enabled(status)
@@ -230,7 +236,7 @@ function text_component:print_text(from, part, x, y, rotation, scale, cursive)
 				if letter_animation_alpha_blend then 
 					color_alpha_blend = letter_animation_alpha_blend(color_alpha_blend)
 				end
-				love.graphics.setColor(r, g, b, a * color_alpha_blend)
+				love.graphics.setColor(r, g, b, a * color_alpha_blend * self.alpha)
 
 				local vertical_scaling = character_animation_progress
 				if letter_animation_vertical_scaling then
@@ -254,7 +260,7 @@ function text_component:print_text(from, part, x, y, rotation, scale, cursive)
 					w = w + self:get_width(next_letter)
 				end
 			end
-			love.graphics.setColor(r, g, b, a)
+			love.graphics.setColor(r, g, b, a * self.alpha)
 			part = cut
 			--y_scale = fract * y_scale
 		end
@@ -280,7 +286,8 @@ function text_component:draw(ui_rect)
 
 	if self.font then
 		love.graphics.setFont(self.font)
-		love.graphics.setColor(unpack(pico8_colors[self.color]))
+		local r,g,b = unpack(pico8_colors[self.color])
+		love.graphics.setColor(r,g,b,self.alpha)
 		-- love.graphics.rectangle("line",x0,y0,ui_rect.w, ui_rect.h)
 	end
 

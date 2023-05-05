@@ -81,7 +81,7 @@ function linear_layouter_component:layout_update(rect)
 
 	for i = 1, #rect.children do
 		local child = rect.children[i]
-		if child:is_enabled() then
+		if child:is_enabled() and not child.ignore_layouting then
 			local layout_alignment = (child.layout_alignment or default_alignment)
 			local align = layout_alignment[major_pos] or default_alignment[major_pos]
 			local padding_0, padding_1 = layout_alignment[major_padding_0] or 0, layout_alignment[major_padding_1] or 0

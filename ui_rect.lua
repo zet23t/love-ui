@@ -290,6 +290,15 @@ function ui_rect:add_component(cmp, ...)
 	end
 end
 
+function ui_rect:remove_component(cmp)
+	for i=#self.components,1,-1 do
+		if self.components[i] == cmp then
+			table.remove(self.components, i)
+		end
+	end
+	return self
+end
+
 function ui_rect:insert_component(index, cmp)
 	table.insert(self.components, index, cmp)
 	return cmp
