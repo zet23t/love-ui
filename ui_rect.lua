@@ -185,13 +185,16 @@ function ui_rect:remove()
 	end
 	pico8api:del(self.parent.children, self)
 	self.parent = nil
+	self:trigger_on_components("on_removed")
 end
 
 function ui_rect:remove_all_children()
 	for i = 1, #self.children do
 		local child = self.children[i]
 		if child.parent == self then
+			
 			child.parent = nil
+			child:trigger_on_components("on_removed")
 		end
 	end
 	self.children = {}
