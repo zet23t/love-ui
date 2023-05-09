@@ -57,6 +57,7 @@ end
 local ui_rect = require "love-util.class" "ui_rect"
 
 ui_rect.is_blocking_mouse = true
+ui_rect.cursor = require "love-ui.cursors".cursor_normal
 
 function ui_rect:set_is_blocking_mouse(blocking)
 	self.is_blocking_mouse = blocking

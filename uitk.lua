@@ -2,21 +2,12 @@ local floor = require "love-math.floor"
 local pico8api = require "love-ui.pico8api"
 local uitk_vars = require "love-ui.uitk_vars"
 
-local cursor_normal = { id = 1, offset_x = -1, offset_y = -1 }
-local cursor_resize = { id = 17, offset_x = -4, offset_y = -4 }
-local cursor_horizontal = { id = 49, offset_x = -8, offset_y = -8 }
-local cursor_hidden = { id = -1 }
-local cursor = cursor_normal
 
 local uitk = {
-	cursors = {
-		cursor_normal = cursor_normal;
-		cursor_resize = cursor_resize;
-		cursor_hidden = cursor_hidden;
-		cursor_horizontal = cursor_horizontal;
-	}
+	cursors = require "love-ui.cursors"
 }
 uitk._mt = { __index = uitk }
+uitk.cursor = uitk.cursors.cursor_normal
 
 function uitk:new()
 	local self = setmetatable({}, self._mt)
@@ -37,7 +28,7 @@ function uitk:load_context()
 end
 
 function uitk:set_cursor(c)
-	cursor = c
+	self.cursor = c
 end
 
 function uitk:keypressed(key)
@@ -57,8 +48,9 @@ function uitk:draw(root)
 		:recursive_trigger("layout_update")
 		:draw()
 	pico8api:clip()
-	if cursor.id >= 0 then
-		pico8api:spr(cursor.id, x + cursor.offset_x, y + cursor.offset_y)
+
+	if self.cursor.id >= 0 then
+		pico8api:spr(self.cursor.id, x + self.cursor.offset_x, y + self.cursor.offset_y)
 	end
 end
 
@@ -92,6 +84,10 @@ function uitk:update(root)
 	local hits = {}
 	root:do_layout():collect_hits(x, y, hits)
 	root:update_flags(x, y, hits)
+
+	if #hits > 0 then
+		self.cursor = hits[1].cursor
+	end
 	
 	uitk_vars.queued_updates = {}
 	-- the update call is collecting information which calls need to be done
