@@ -279,7 +279,7 @@ function text_component:draw(ui_rect)
 	local t, r, b, l = self.t, self.r, self.b, self.l
 	local x0, y0 = ui_rect:to_world()
 	local w = self:get_width(self.text)
-	local h = ui_rect.h -- self.line_height * self.scale
+	local h = self.line_height * self.scale
 	local maxpos_x = ui_rect.w - r - l
 	local maxpos_y = ui_rect.h - t - b
 	local scale = self.scale
