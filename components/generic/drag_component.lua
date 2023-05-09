@@ -8,10 +8,11 @@ local function donothing() end
 ---@param dragged_rect ui_rect|nil the ui_rect to drag; if nil, the component will move its own rect
 ---@param raster number|nil the raster to use to align the rect. Defaults to 1.
 ---@return unknown
-function drag_component:new(dragged_rect, raster)
+function drag_component:new(dragged_rect, raster, on_position_updated)
 	return drag_component:create {
 		dragged_rect = dragged_rect;
 		raster = raster or 1;
+		on_position_updated = on_position_updated;
 	}
 end
 
@@ -20,9 +21,11 @@ end
 
 function drag_component:is_pressed_down(rect, mx, my)
 	rect = self.dragged_rect or rect
-	rect.x = math.floor((rect.x + mx - self.mx) / self.raster + .5) * self.raster
-	rect.y = math.floor((rect.y + my - self.my) / self.raster + .5) * self.raster
-	self:on_position_updated(rect, rect.x, rect.y)
+	local rx = math.floor((rect.x + mx - self.mx) / self.raster + .5) * self.raster
+	local ry = math.floor((rect.y + my - self.my) / self.raster + .5) * self.raster
+	local x,y = self:on_position_updated(rect, rx, ry)
+	rect.x = x or rx
+	rect.y = y or ry
 end
 
 function drag_component:was_pressed_down(ui_rect, mx, my)
