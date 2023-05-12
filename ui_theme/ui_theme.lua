@@ -51,6 +51,15 @@ ui_theme.icon = {
 	star_outline = 52;
 	big_blue_x = 53;
 	big_blue_dash = 54;
+	play_reverse = 55;
+	to_start = 56;
+	locked_mouse = 57;
+	locked_lock = 58;
+	unlocked_lock = 59;
+	eye_open = 60;
+	eye_closed = 61;
+	limited_play = 62;
+	looped_play = 66;
 }
 
 function ui_theme:new()
@@ -110,7 +119,7 @@ function ui_theme:decorate_button_skin(ui_rect, caption, sprite, on_click)
 	if type(sprite) == "function" then
 		on_click = sprite
 	elseif sprite then
-		ui_rect:add_component(sprite_component:new(sprite, 2, 2))
+		ui_rect:add_component(sprite_component:new(sprite, math.floor((ui_rect.w - 16) / 2), math.floor((ui_rect.h-16) /2)))
 	end
 	if on_click then
 		ui_rect:add_component { was_triggered = on_click }
