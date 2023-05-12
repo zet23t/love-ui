@@ -5,8 +5,8 @@ local late_command = require "love-util.late_command"
 
 local canvas = uitk:new()
 
-love.keyboard.keysPressed = {}
-
+love.keyboard.wasPressedTable = {}
+love.keyboard.keyPressedDownCount = 0
 return function(options)
 	local root_rect
 	local function call(name,...)
@@ -15,8 +15,15 @@ return function(options)
 		end
 	end
 
-	function love.keypressed(key, scancode)
-		love.keyboard.keysPressed[key] = true
+	function love.keyreleased(key, scancode)
+		love.keyboard.keyPressedDownCount = love.keyboard.keyPressedDownCount - 1
+	end
+
+	function love.keypressed(key, scancode, is_repeat)
+		if not is_repeat then
+			love.keyboard.keyPressedDownCount = love.keyboard.keyPressedDownCount + 1
+		end
+		love.keyboard.wasPressedTable[key] = true
 		uitk:keypressed(key)
 		call("keypressed", key, scancode)
 	end
@@ -37,7 +44,7 @@ return function(options)
 	---@param key love.KeyConstant
 	---@return boolean
 	function love.keyboard.wasPressed(key)
-		return love.keyboard.keysPressed[key]
+		return love.keyboard.wasPressedTable[key]
 	end
 
 	function love.wheelmoved(x, y)
@@ -49,7 +56,7 @@ return function(options)
 		call("update", dt)
 		canvas:update(root_rect)
 		late_command:flush()
-		love.keyboard.keysPressed = {}
+		love.keyboard.wasPressedTable = {}
 	end
 
 	local background_color = options.background_color or {.7, .7, .7, 0}
