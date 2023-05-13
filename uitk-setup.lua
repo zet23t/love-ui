@@ -2,6 +2,7 @@ local uitk         = require "love-ui.uitk"
 local pico8api     = require "love-ui.pico8api"
 local ui_rect      = require "love-ui.ui_rect"
 local late_command = require "love-util.late_command"
+local bench        = require "love-util.bench"
 
 local canvas = uitk:new()
 
@@ -61,11 +62,11 @@ return function(options)
 
 	local background_color = options.background_color or {.7, .7, .7, 0}
 	function love.draw()
+		local b = bench "uitk-setup:draw"
 		local screen_x = love.graphics.getWidth()
 		local screen_y = love.graphics.getHeight()
 		love.graphics.reset()
 		love.graphics.clear(background_color)
-
 		call "draw"
 
 		if options.target_resolution_width then
@@ -93,6 +94,7 @@ return function(options)
 		late_command:flush()
 
 		call "draw_post_gui"
+		b()
 	end
 
 	return root_rect
