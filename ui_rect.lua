@@ -295,8 +295,9 @@ function ui_rect:add_component(cmp, ...)
 end
 
 function ui_rect:remove_component(cmp)
+	local is_fun = type(cmp) == "function"
 	for i=#self.components,1,-1 do
-		if self.components[i] == cmp then
+		if self.components[i] == cmp or (is_fun and cmp(self.components[i])) then
 			table.remove(self.components, i)
 		end
 	end
