@@ -153,6 +153,7 @@ function ui_rect:trigger_on_components(name, ...)
 end
 
 function ui_rect:trigger_on_components_and_children(name, ...)
+	if self.disabled then return end
 	trigger(self.components, name, ...)
 	for i = 1, #self.children do
 		self.children[i]:trigger_on_components_and_children(name, ...)
