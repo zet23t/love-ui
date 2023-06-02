@@ -283,6 +283,10 @@ function ui_rect:get_size()
 	return self.w, self.h
 end
 
+function ui_rect:get_center()
+	return self.x + self.w / 2, self.y + self.h / 2
+end
+
 ---Add a variable number of components to the ui_rect
 ---@param cmp ui_rect_component|table
 ---@param ... ui_rect_component|table
