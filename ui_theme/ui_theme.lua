@@ -113,13 +113,15 @@ end
 ---@return ui_rect
 function ui_theme:decorate_button_skin(ui_rect, caption, sprite, on_click)
 	ui_rect:add_component(self:button_skin())
+	local has_sprite = type(sprite) == "number"
 	if caption then
-		ui_rect:add_component(text_component:new(caption, 1, 2, 6, 2, 6, .5, .5))
+		ui_rect:add_component(text_component:new(caption, 1, 2, 6, 2, has_sprite and 19 or 6, has_sprite and 0 or .5, .5))
 	end
 	if type(sprite) == "function" then
 		on_click = sprite
 	elseif sprite then
-		ui_rect:add_component(sprite_component:new(sprite, math.floor((ui_rect.w - 16) / 2), math.floor((ui_rect.h-16) /2)))
+		ui_rect:add_component(sprite_component:new(sprite, 
+			caption and 2 or math.floor((ui_rect.w - 16) / 2), math.floor((ui_rect.h-16) /2)))
 	end
 	if on_click then
 		ui_rect:add_component { was_triggered = on_click }
