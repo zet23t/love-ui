@@ -95,6 +95,9 @@ return function(options)
 
 		call "draw_post_gui"
 		b()
+
+		local uitk_vars = require "love-ui.uitk_vars"
+		uitk_vars.stats = love.graphics.getStats()
 	end
 
 	return root_rect
