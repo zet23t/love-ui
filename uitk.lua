@@ -86,7 +86,7 @@ function uitk:update(root)
 	root:update_flags(x, y, hits)
 
 	if #hits > 0 then
-		self.cursor = hits[1].cursor
+		self.cursor = hits[1].cursor or self.cursor
 	end
 	
 	uitk_vars.queued_updates = {}
