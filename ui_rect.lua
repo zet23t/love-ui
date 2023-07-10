@@ -407,8 +407,10 @@ function ui_rect:new(x, y, w, h, parent, ...)
 		children = {},
 		id = "<>"
 	}
-	if parent then
+	if parent and parent.new == ui_rect.new then
 		self:set_parent(parent)
+	elseif parent then
+		self:add_component(parent)
 	end
 	self:add_component(...)
 	
