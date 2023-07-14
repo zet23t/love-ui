@@ -60,6 +60,11 @@ ui_theme.icon = {
 	eye_closed = 61;
 	limited_play = 62;
 	looped_play = 66;
+	pen = 67;
+	eraser = 68;
+	move_arrows = 69;
+	hand = 70;
+	grid = 71;
 }
 
 function ui_theme:new()
@@ -102,6 +107,53 @@ function ui_theme:button_skin()
 		self.sx = rect.flags.is_mouse_over and 32 * 2 or 16 * 2
 		self.is_dirty = true
 	end
+
+	return s9
+end
+
+function ui_theme:push_button_skin(state)
+	local s9 = sprite9_component:new(16 * 2, 0, 16, 16, 4, 4, 4, 4);
+	--self.push_button_state = state
+
+	s9.set_push_button_state = function(self, state)
+		self.push_button_state = state
+		self:was_released()
+	end
+
+
+	s9.mouse_enter = function(self)
+		self.sx = self.push_button_state and 48 or 64
+		self.mouse_is_over = true
+		self.is_dirty = true
+	end
+
+	s9.was_triggered = function(self, rect)
+		self.push_button_state = not self.push_button_state
+		self:was_released()
+	end
+
+	s9.mouse_exit = function(self)
+		self.sx = self.push_button_state and 144 or 32
+		self.mouse_is_over = false
+		self.is_dirty = true
+	end
+
+	s9.is_pressed_down = function(self)
+		self.sx = self.push_button_skin and 64 or 48
+		self.is_dirty = true
+	end
+
+	s9.was_released = function(self)
+		if self.mouse_is_over then
+			self.sx = self.push_button_state and 48 or 64
+		else
+			self.sx = self.push_button_state and 144 or 32
+		end
+		self.is_dirty = true
+	end
+
+	s9:set_push_button_state(state)
+
 
 	return s9
 end
@@ -185,6 +237,26 @@ function ui_theme:decorate_toggle_skin(ui_rect, caption, state, on_toggle)
 			end
 		end
 	})
+end
+
+function ui_theme:decorate_push_button_skin(ui_rect,state, caption, sprite, on_toggle)
+	local skin = ui_rect:add_component(self:push_button_skin(state))
+	local has_sprite = type(sprite) == "number"
+	if caption then
+		ui_rect:add_component(text_component:new(caption, 1, 2, 6, 2, has_sprite and 19 or 6, has_sprite and 0 or .5, .5))
+	end
+	if type(sprite) == "function" then
+		on_toggle = sprite
+	elseif sprite then
+		ui_rect:add_component(sprite_component:new(sprite, 
+			caption and 2 or math.floor((ui_rect.w - 16) / 2), math.floor((ui_rect.h-16) /2)))
+	end
+	if on_toggle then
+		ui_rect:add_component { was_triggered = function() 
+			on_toggle(skin.push_button_state)
+		end}
+	end
+	return ui_rect
 end
 
 return ui_theme

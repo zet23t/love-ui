@@ -10,7 +10,7 @@ local sprite_component = require "love-util.class" "sprite_component":extends(re
 ---@param v number|nil
 ---@param w number|nil
 ---@param h number|nil
----@param sheet love.Image
+---@param sheet love.Image|nil
 ---@return sprite_component
 function sprite_component:new(sprite_id, x, y, u, v, w, h, sheet)
 	return sprite_component:create {
