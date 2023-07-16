@@ -65,6 +65,7 @@ ui_theme.icon = {
 	move_arrows = 69;
 	hand = 70;
 	grid = 71;
+	boundary_paint = 72;
 }
 
 function ui_theme:new()
