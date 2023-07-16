@@ -33,7 +33,7 @@ function rectfill_component:draw(ui_rect)
 	local x2, y2 = x + ui_rect.w - 1 - self.r, y + ui_rect.h - 1 - self.b
 	x, y = x + self.l, y + self.t
 
-	if self.fill >= 0 then pico8api:rectfill(x, y, x2 + 1, y2 + 1, self.fill, self.alpha) end
+	if type(self.fill) == "table" or self.fill >= 0 then pico8api:rectfill(x, y, x2 + 1, y2 + 1, self.fill, self.alpha) end
 	if self.border >= 0 then
 		for i = 0, self.border_width - 1 do
 			pico8api:rect(x + .5 + i, y + .5 + i, x2 + .5 - i, y2 + .5 - i, self.border, self.alpha)

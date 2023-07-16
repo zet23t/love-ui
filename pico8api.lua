@@ -12,7 +12,11 @@ local function with_color(fn, r, g, b, a)
 end
 
 function pico8api:rectfill(x, y, x2, y2, color, alpha_override)
-	local r, g, b, a = unpack(self.colors[color])
+	local r, g, b, a = unpack(type(color) == "table" and color or self.colors[color])
+	r = r or 1
+	g = g or 1
+	b = b or 1
+	a = a or 1
 	with_color(function()
 		love.graphics.rectangle("fill", x, y, x2 - x, y2 - y)
 	end, r, g, b, alpha_override or a)
