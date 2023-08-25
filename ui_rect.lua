@@ -365,8 +365,10 @@ function ui_rect:set_parent(p)
 		self:remove()
 		return
 	end
+	self:remove()
 	self.parent = p
 	pico8api:add(p.children, self)
+	self:trigger_on_components("on_set_parent")
 end
 
 function ui_rect:set_rect(x, y, w, h)
