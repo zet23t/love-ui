@@ -194,7 +194,6 @@ function ui_rect:remove_all_children()
 	for i = 1, #self.children do
 		local child = self.children[i]
 		if child.parent == self then
-			
 			child.parent = nil
 			child:trigger_on_components("on_removed")
 		end
@@ -224,9 +223,9 @@ function ui_rect:update(mx, my)
 
 	flag_trigger(self, "is_mouse_over", mx, my)(
 		self, "was_released", mx, my)(
-		self, "was_pressed_down", mx, my)(
-		self, "was_triggered", mx, my)(
-		self, "is_pressed_down", mx, my)
+			self, "was_pressed_down", mx, my)(
+			self, "was_triggered", mx, my)(
+			self, "is_pressed_down", mx, my)
 
 	trigger_queued(self.components, "update", self, mx, my)
 	trigger(self.children, "update", mx, my)
@@ -240,29 +239,28 @@ function ui_rect:draw()
 	if self.disabled then
 		return
 	end
-	
+
 	local cx, cy, cw, ch = clip_stack:current_rect()
 	local wx, wy = self:to_world(0, 0)
 	if wx < cx + cw and wy < cy + ch and wx + self.w >= cx and wy + self.h >= cy then
 		trigger(self.components, "pre_draw", self)(
 			self.components, "draw", self)(
-			self.children, "draw")(
-			self.components, "post_draw", self)
+				self.children, "draw")(
+				self.components, "post_draw", self)
 	else
 		trigger(self.components, "pre_draw", self)(
 			self.children, "draw")(
-			self.components, "post_draw", self)
+				self.components, "post_draw", self)
 	end
-
 end
 
 function ui_rect:to_local(x, y)
 	local rect = self
 	repeat
-		x,y = x - rect.x, y - rect.y
+		x, y = x - rect.x, y - rect.y
 		rect = rect.parent
 	until not rect
-	return x,y
+	return x, y
 end
 
 function ui_rect:to_world(x, y)
@@ -301,7 +299,7 @@ end
 
 function ui_rect:remove_component(cmp)
 	local is_fun = type(cmp) == "function"
-	for i=#self.components,1,-1 do
+	for i = #self.components, 1, -1 do
 		if self.components[i] == cmp or (is_fun and cmp(self.components[i])) then
 			table.remove(self.components, i)
 		end
@@ -385,10 +383,20 @@ end
 
 function ui_rect:is_enabled() return not self.disabled end
 
+function ui_rect:is_enabled_in_hierarchy()
+	if self.disabled then return false end
+	if self.parent then
+		return self.parent:is_enabled_in_hierarchy()
+	end
+	return self.is_root_rect
+end
+
 function ui_rect:set_enabled(is_enabled)
 	if self.disabled == not is_enabled then return self end
 	self.disabled = not is_enabled
+
 	self:trigger_on_components_and_children("on_set_enabled", is_enabled)
+
 	return self
 end
 
@@ -413,7 +421,7 @@ function ui_rect:new(x, y, w, h, parent, ...)
 		self:add_component(parent)
 	end
 	self:add_component(...)
-	
+
 	return self
 end
 
