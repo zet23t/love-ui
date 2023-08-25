@@ -66,6 +66,7 @@ ui_theme.icon = {
 	hand = 70;
 	grid = 71;
 	boundary_paint = 72;
+	open_folder_add = 73;
 }
 
 function ui_theme:new()
