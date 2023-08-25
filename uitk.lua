@@ -41,6 +41,7 @@ function uitk:textinput(key)
 end
 
 function uitk:draw(root)
+	root.is_root_rect = true
 	self:load_context()
 	uitk_vars.frame_counter = uitk_vars.frame_counter + 1
 	local x, y = uitk:get_mouse()
@@ -66,6 +67,7 @@ end
 
 local prev_mouse_down, mouse_down
 function uitk:update(root)
+	root.is_root_rect = true
 	self:load_context()
 	local x, y, b = uitk:get_mouse()
 	mouse_down = b
