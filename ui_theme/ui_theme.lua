@@ -67,8 +67,10 @@ ui_theme.icon = {
 	grid = 71;
 	boundary_paint = 72;
 	open_folder_add = 73;
-	triangle_up = 75;
-	triangle_down = 74;
+	triangle_up = 74;
+	triangle_right = 75;
+	triangle_down = 76;
+	triangle_left = 77;
 }
 
 function ui_theme:new()
