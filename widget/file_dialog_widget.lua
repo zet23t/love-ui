@@ -5,6 +5,7 @@ local rectfill_component            = require "love-ui.components.generic.rectfi
 local weighted_position_component   = require "love-ui.components.layout.weighted_position_component"
 local parent_limited_size_component = require "love-ui.components.layout.parent_limited_size_component"
 local text_component                = require "love-ui.components.generic.text_component"
+local textfield_component           = require "love-ui.components.generic.textfield_component"
 local clip_component                = require "love-ui.components.generic.clip_component"
 local pico8api                      = require "love-ui.pico8api"
 local clip_stack                    = require "love-ui.clip_stack"
@@ -17,14 +18,14 @@ local sprite_component              = require "love-ui.components.generic.sprite
 ---@field screen_rect ui_rect the full screen rect
 ---@field directory_hierarchy_list ui_rect
 ---@field opened_directories table
-local file_dialog_widget = require "love-util.class" "file_dialog_widget"
+local file_dialog_widget            = require "love-util.class" "file_dialog_widget"
 
 
 file_dialog_widget.indent_per_level = 4
 
 ---@param ui_theme ui_theme
 ---@return file_dialog_widget
-function file_dialog_widget:new(ui_theme)
+function file_dialog_widget:new(ui_theme, title, action)
 	---@type file_dialog_widget
 	---@diagnostic disable-next-line: assign-type-mismatch
 	local self = file_dialog_widget:create {}
@@ -41,7 +42,7 @@ function file_dialog_widget:new(ui_theme)
 
 	self.dialog_panel = ui_rect:new(0, 0, width, height, self.screen_rect, weighted_position_component:new(),
 		parent_limited_size_component:new(width, height))
-	ui_theme:decorate_window_skin(self.dialog_panel, "Open file")
+	ui_theme:decorate_window_skin(self.dialog_panel, title or "Open file")
 
 	self.close_x_button = ui_rect:new(0, 0, 16, 16, self.dialog_panel, weighted_position_component:new(1, 0, 2, 4))
 	ui_theme:decorate_sprite(self.close_x_button, ui_theme.icon.close_x)
@@ -51,15 +52,20 @@ function file_dialog_widget:new(ui_theme)
 	ui_theme:decorate_button_skin(self.cancel_button, "Cancel", function() self:close(true) end)
 
 	self.open_button = ui_rect:new(0, 0, 80, 18, self.dialog_panel, weighted_position_component:new(1, 1, 0, 90, 6))
-	ui_theme:decorate_button_skin(self.open_button, "Open", function() self:close() end)
+	ui_theme:decorate_button_skin(self.open_button, action or "Open", function() self:close() end)
 
+	self.file_name_text_field = textfield_component:new("", 1, 2, 2, 2, 2, 0, .5)
+	self.file_name_text_field.file_dialog = self
+	function self.file_name_text_field:on_text_updated()
+		self.file_dialog.current_file_name = self.text
+	end
 	self.file_name = ui_rect:new(3, 0, 0, 18, self.dialog_panel,
 		rectfill_component:new(7, 1),
-		text_component:new("", 1, 2, 2, 2, 2, 0, .5),
+		self.file_name_text_field,
 		{
-			layout_update = function(c, rect) rect.y, rect.w = rect.parent.h - 24, rect.parent.w - 180 end;
-			mouse_enter = function(c, rect) rect:trigger_on_components("set_fill", 15) end;
-			mouse_exit = function(c, rect) rect:trigger_on_components("set_fill", 7) end;
+			layout_update = function(c, rect) rect.y, rect.w = rect.parent.h - 24, rect.parent.w - 180 end,
+			mouse_enter = function(c, rect) rect:trigger_on_components("set_fill", 15) end,
+			mouse_exit = function(c, rect) rect:trigger_on_components("set_fill", 7) end,
 		}
 	)
 
@@ -84,12 +90,14 @@ function file_dialog_widget:new(ui_theme)
 
 			-- print(index,#self.directory_hierarchy_list)
 			local rect = ui_rect:new(0, 0, 0, 0, nil, rectfill_component:new(nil, nil, .25))
-			local text_and_icon = ui_rect:new(element.level * self.indent_per_level + 16, 0, 10 + element.text_width, 18, rect,
+			local text_and_icon = ui_rect:new(element.level * self.indent_per_level + 16, 0, 10 + element.text_width, 18,
+				rect,
 				sprite_component:new(element.is_opened and ui_theme.icon.open_folder or ui_theme.icon.closed_folder, 0),
 				text_component:new(element.file_name, 0, 0, 0, 0, 18, 0, .5),
 				{ was_triggered = select })
 			local toggle_open = ui_rect:new(element.level * self.indent_per_level, 0, 16, 16, rect,
-				sprite_component:new(element.is_opened and ui_theme.icon.tiny_triangle_down or ui_theme.icon.tiny_triangle_right, 3,
+				sprite_component:new(
+					element.is_opened and ui_theme.icon.tiny_triangle_down or ui_theme.icon.tiny_triangle_right, 3,
 					3),
 				{
 					was_triggered = function()
@@ -99,9 +107,9 @@ function file_dialog_widget:new(ui_theme)
 				})
 			rect:add_component
 			{
-				mouse_enter = function(component, rect) rect:trigger_on_components("set_fill", 2) end;
-				mouse_exit = function(component, rect) rect:trigger_on_components("set_fill", nil) end;
-				was_triggered = select;
+				mouse_enter = function(component, rect) rect:trigger_on_components("set_fill", 2) end,
+				mouse_exit = function(component, rect) rect:trigger_on_components("set_fill", nil) end,
+				was_triggered = select,
 			}
 			return rect
 		end))
@@ -122,8 +130,8 @@ function file_dialog_widget:new(ui_theme)
 				sprite_component:new(element.is_directory and ui_theme.icon.closed_folder or ui_theme.icon.generic_file),
 				text_component:new(element.file_name, 0, 0, 0, 0, 20, 0))
 			rect:add_component {
-				mouse_enter = function(c, rect) rect:trigger_on_components("set_fill", 2) end;
-				mouse_exit = function(c, rect) rect:trigger_on_components("set_fill", nil) end;
+				mouse_enter = function(c, rect) rect:trigger_on_components("set_fill", 2) end,
+				mouse_exit = function(c, rect) rect:trigger_on_components("set_fill", nil) end,
 				was_triggered = function()
 					if element.is_directory then
 						self:set_directory(element.file_path)
@@ -149,9 +157,14 @@ function file_dialog_widget:on_closed(selected_file)
 	print("Selected file for opening: ", selected_file)
 end
 
+function file_dialog_widget:set_path(name)
+	self:set_directory(name:match "^(.-/?)[^/]*$")
+	self:set_file_name(name:match "[^/]*$")
+end
+
 function file_dialog_widget:set_file_name(name)
-	self.file_name:trigger_on_components("set_text", name)
 	self.current_file_name = name
+	self.file_name_text_field:set_text(name)
 end
 
 function file_dialog_widget:set_directory(path)
@@ -174,12 +187,12 @@ function file_dialog_widget:set_directory(path)
 		local info = nativefs.getInfo(file_path)
 		if info then
 			self.file_list[#self.file_list + 1] = {
-				file_path = file_path;
-				file_name = files[i];
-				is_directory = info.type == "directory";
-				is_file = info.type == "file";
-				size = info.size;
-				modtime = info.modtime;
+				file_path = file_path,
+				file_name = files[i],
+				is_directory = info.type == "directory",
+				is_file = info.type == "file",
+				size = info.size,
+				modtime = info.modtime,
 			}
 		end
 	end
@@ -200,12 +213,12 @@ function file_dialog_widget:set_directory(path)
 				local is_opened = (open_status ~= false and file_path == path:sub(1, #file_path)) or open_status
 				self.opened_directories[file_path] = is_opened
 				local element = {
-					level = level;
-					is_opened = is_opened;
-					file_path = file_path;
-					file_name = files[i];
-					directory = current_path;
-					text_width = pico8api:text_width(files[i]);
+					level = level,
+					is_opened = is_opened,
+					file_path = file_path,
+					file_name = files[i],
+					directory = current_path,
+					text_width = pico8api:text_width(files[i]),
 				}
 				self.directory_hierarchy_list[#self.directory_hierarchy_list + 1] = element
 				self.max_width = math.max(self.max_width, self.indent_per_level * level + element.text_width + 23)
