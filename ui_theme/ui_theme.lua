@@ -71,6 +71,11 @@ ui_theme.icon = {
 	triangle_right = 75;
 	triangle_down = 76;
 	triangle_left = 77;
+	layer = 78;
+	add_layer = 79;
+	remove_layer = 80;
+	red_x = 81;
+	trash = 82;
 }
 
 function ui_theme:new()
