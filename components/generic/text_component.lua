@@ -3,7 +3,7 @@ local pico8api = require "love-ui.pico8api"
 local pico8_colors = require "lib.love-ui.pico8_colors"
 
 ---@class text_component : ui_rect_component
----@field text string
+---@field text string|function if it is a function, it is called upon refresh, otherwise it is the string displayed
 ---@field color integer
 ---@field align_x number
 ---@field align_y number
@@ -98,7 +98,7 @@ end
 local function layout_update_size(self, rect)
 	local lines
 	if self.is_fitting_width then
-		lines = get_wrapped_text(self, self.text, self.wrapping_width)
+		lines = get_wrapped_text(self, self:get_text(), self.wrapping_width)
 		local max_width = 0
 		for i = 1, #lines do
 			max_width = math.max(max_width, lines[i][2])
@@ -110,17 +110,17 @@ local function layout_update_size(self, rect)
 		return
 	end
 
-	if self.cached_text == self.text and self.cached_w == rect.w and self.cached_h == rect.h then
+	if self.cached_text == self:get_text() and self.cached_w == rect.w and self.cached_h == rect.h then
 		return
 	end
 
 	local maxpos_x = rect.w - self.r - self.l
-	lines = lines or get_wrapped_text(self, self.text, maxpos_x)
+	lines = lines or get_wrapped_text(self, self:get_text(), maxpos_x)
 	rect.h = (self.line_height * #lines + self.line_spacing * (#lines - 1)) * self.scale + self.b + self.t
 	if self.font then
 		rect.h = rect.h - (self.font:getHeight() - self.font:getBaseline()) * self.scale
 	end
-	self.cached_text = self.text
+	self.cached_text = self:get_text()
 	self.cached_w = rect.w
 	self.cached_h = rect.h
 end
@@ -182,7 +182,7 @@ function text_component:print_text(from, part, x, y, rotation, scale, cursive)
 	if self.animation_settings and self.animation_settings.duration_per_character then
 		local animation_speed = self.animation_settings.duration_per_character
 		local next_n = self.animation_settings.animated_character_count or 6
-		local total_len = utf8.len(self.text)
+		local total_len = utf8.len(self:get_text())
 		local delta = love.timer.getTime() - self.activation_time
 		local t = delta / animation_speed
 		local index = 1
@@ -278,7 +278,7 @@ end
 function text_component:draw(ui_rect)
 	local t, r, b, l = self.t, self.r, self.b, self.l
 	local x0, y0 = ui_rect:to_world()
-	local w = self:get_width(self.text)
+	local w = self:get_width(self:get_text())
 	local h = self.line_height * self.scale
 	local maxpos_x = ui_rect.w - r - l
 	local maxpos_y = ui_rect.h - t - b
@@ -351,7 +351,7 @@ function text_component:draw(ui_rect)
 	end
 
 	if w > maxpos_x and self.is_multiline_enabled then
-		local lines = get_wrapped_text(self, self.text, maxpos_x)
+		local lines = get_wrapped_text(self, self:get_text(), maxpos_x)
 		local line_offset = (self.line_height + self.line_spacing) * scale
 		h = self.line_height * #lines * scale + self.line_spacing * (#lines - 1) * scale
 		local pos = 1
@@ -361,7 +361,7 @@ function text_component:draw(ui_rect)
 			pos = pos + #line[1]
 		end
 	else
-		print_line(1, self.text, w, self.firstline_indent, 0, 0)
+		print_line(1, self:get_text(), w, self.firstline_indent, 0, 0)
 	end
 
 	if self.font then
@@ -369,8 +369,28 @@ function text_component:draw(ui_rect)
 	end
 end
 
+---Sets the text of the component. If it is a function, the function is called upon refresh
+---@param text nil|string|function
 function text_component:set_text(text)
 	self.text = text or ""
+	if type(self.text) == "function" then
+		self.cached_text = nil
+	end
+end
+
+---Returns set text of the component or, if it is a callback function, returns the result of the 
+---function call
+---@return string
+function text_component:get_text()
+	if type(self.text) == "function" then
+		return tostring(self:text())
+	end
+	return tostring(self.text)
+end
+
+---Clears the cached text. If the text is a callback function, the function is called upon update
+function text_component:refresh_text()
+	self.cached_text = nil
 end
 
 return text_component
