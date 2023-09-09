@@ -76,6 +76,8 @@ ui_theme.icon = {
 	remove_layer = 80;
 	red_x = 81;
 	trash = 82;
+	circle_dot_dark = 83;
+	circle_dot_light = 84;
 }
 
 function ui_theme:new()

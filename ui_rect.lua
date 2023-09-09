@@ -277,8 +277,9 @@ function ui_rect:add_component_proxy(cmp, ...)
 	end
 end
 
-function ui_rect:get_size()
-	return self.w, self.h
+function ui_rect:get_size(factor)
+	factor = factor or 1
+	return self.w * factor, self.h * factor
 end
 
 function ui_rect:get_center()
